@@ -501,14 +501,27 @@
 
   function filtrar() { renderTabla(); }
 
-  // ── CAMBIAR ESTADO RÁPIDO ────────────────────────────────────
+// ── CAMBIAR ESTADO RÁPIDO (Con envío automático a WhatsApp) ────────────────
   async function cambiarEstado(id, nuevoEstado) {
     const { error } = await sb.from('consultas').update({ estado: nuevoEstado }).eq('id', id);
     if (error) { toast('❌ Error: ' + error.message); return; }
+    
+    // Obtener los datos del registro modificado antes de mapear
+    const registroModificado = todasConsultas.find(r => r.id === id);
+    
     todasConsultas = todasConsultas.map(r => r.id === id ? {...r, estado: nuevoEstado} : r);
     actualizarStats();
     renderTabla();
     toast(nuevoEstado === 'aprobada' ? '✅ Consulta aprobada' : '❌ Consulta rechazada');
+
+    // Enviar el mensaje automático al cliente si el registro existe
+    if (registroModificado) {
+      const registroActualizado = {...registroModificado, estado: nuevoEstado};
+      // Pequeño retraso para que el administrador note el cambio visual en el panel antes de abrir la pestaña
+      setTimeout(() => {
+        enviarWA(registroActualizado);
+      }, 500);
+    }
   }
 
   // ── MODAL ────────────────────────────────────────────────────
@@ -529,6 +542,7 @@
     document.getElementById('modal-bg').classList.remove('open');
   }
 
+ // ── GUARDAR CAMBIOS DESDE MODAL (Con envío automático a WhatsApp) ──────────
   async function guardarCambios() {
     const id     = document.getElementById('m-id').value;
     const update = {
@@ -548,9 +562,15 @@
     renderTabla();
     cerrarModal();
     toast('💾 Cambios guardados correctamente');
+
+    // Lanzar el mensaje de WhatsApp estructurado con los nuevos cambios e ID
+    const registroCompleto = { id, ...update, codigo: document.getElementById('m-codigo').value };
+    setTimeout(() => {
+      enviarWA(registroCompleto);
+    }, 500);
   }
 
-  // ── WHATSAPP ─────────────────────────────────────────────────
+ // ── WHATSAPP FORMATO SEGURO ─────────────────────────────────────────────────
   function enviarWA(r) {
     const estadoTexto = { pendiente:'PENDIENTE ⏳', aprobada:'APROBADA ✅', rechazada:'RECHAZADA ❌' }[r.estado];
     const msg = encodeURIComponent(
@@ -558,13 +578,21 @@
       `Estimado/a ${r.nombre},\n\n` +
       `Su solicitud con código *${r.codigo}* ha sido revisada.\n` +
       `Estado actual: *${estadoTexto}*\n\n` +
-      `${r.notas ? '📋 Nota: ' + r.notas + '\n\n' : ''}` +
+      `${r.notas ? '📋 Nota del Abogado:\n' + r.notas + '\n\n' : ''}` +
       `Por favor contáctenos al responder este mensaje si tiene alguna consulta adicional.\n\n` +
       `_Atte. Estudio Jurídico Jorge Meza Espín_`
     );
-    window.open(`https://wa.me/${r.celular.replace(/\D/g,'')}?text=${msg}`, '_blank');
+    
+    // Formatear el número limpiando caracteres no numéricos
+    let numeroLimpio = r.celular.replace(/\D/g, '');
+    
+    // Si el número es de Ecuador, empieza con 0 y tiene 10 dígitos, añadir el código de país
+    if (numeroLimpio.length === 10 && numeroLimpio.startsWith('0')) {
+      numeroLimpio = '593' + numeroLimpio.substring(1);
+    }
+    
+    window.open(`https://wa.me/${numeroLimpio}?text=${msg}`, '_blank');
   }
-
   // ── TOAST ────────────────────────────────────────────────────
   function toast(msg) {
     const el = document.getElementById('toast');
