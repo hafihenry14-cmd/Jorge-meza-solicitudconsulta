@@ -321,7 +321,7 @@
           <label>Código de solicitud</label>
           <div class="code-group">
             <input type="text" id="codigo" readonly />
-            <button class="btn-regen" onclick="generarCodigo()" title="Generar nuevo código">↻</button>
+            <button class="btn-regen" id="btn-regen" title="Generar nuevo código">↻</button>
           </div>
           <span class="hint">Guarde este código para hacer seguimiento</span>
         </div>
@@ -387,9 +387,14 @@
     for (let i = 0; i < 8; i++) {
       code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    document.getElementById('codigo').value = code;
+    const el = document.getElementById('codigo');
+    if (el) el.value = code;
   }
-  generarCodigo(); // generar al cargar
+
+  document.addEventListener('DOMContentLoaded', function() {
+    generarCodigo();
+    document.getElementById('btn-regen').addEventListener('click', generarCodigo);
+  });
 
   // ── ENVIAR SOLICITUD ─────────────────────────────────────────
   async function enviarSolicitud() {
