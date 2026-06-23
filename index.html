@@ -371,50 +371,52 @@
 </footer>
 
 <script>
-  // ── CONFIG SUPABASE ──────────────────────────────────────────
+  // ── CONFIGURACIÓN ──────────────────────────────────────────
   const SUPABASE_URL = 'https://ctbnbikbwgujqglcobcl.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Ym5iaWtid2d1anFnbGNvYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTk3MzQsImV4cCI6MjA5Nzc3NTczNH0.MbaUNGXZ5HEihaQDPXjERxirOLncfe52kqoBrEJhBZw';
-  // Número de WhatsApp del estudio (solo dígitos, con código de país)
-  const WA_NUMBER = '593978973366';
+  const WA_NUMBER = '593978973366'; // WhatsApp del estudio
 
-  let supabase;
-  
-  // Inicializar Supabase de forma segura
-  try {
-    if (window.supabase) {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    } else {
-      console.error('Supabase no se pudo cargar desde el CDN.');
-    }
-  } catch (e) {
-    console.error('Error al inicializar Supabase:', e);
-  }
-
-  // ── CÓDIGO ALEATORIO ─────────────────────────────────────────
+  // ── 1. FUNCIÓN GENERAR CÓDIGO (Independiente y prioritaria) ──
   function generarCodigo() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 8; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    try {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
+      let code = '';
+      for (let i = 0; i < 8; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      const el = document.getElementById('codigo');
+      if (el) {
+        el.value = code;
+      } else {
+        console.error("No se encontró el input con id 'codigo'");
+      }
+    } catch (err) {
+      console.error("Error al generar código:", err);
     }
-    const el = document.getElementById('codigo');
-    if (el) el.value = code;
   }
 
-  // Escuchar cuando el HTML esté completamente cargado
-  document.addEventListener('DOMContentLoaded', function() {
+  // Ejecución inmediata y segura en cuanto el HTML esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', inicializarPagina);
+  } else {
+    inicializarPagina();
+  }
+
+  function inicializarPagina() {
+    // Forzar la aparición del código de inmediato
     generarCodigo();
-    
+
+    // Asignar el botón de regenerar código de forma segura
     const btnRegen = document.getElementById('btn-regen');
     if (btnRegen) {
-      btnRegen.addEventListener('click', function(e) {
-        e.preventDefault(); // Evita comportamientos extraños del botón
+      btnRegen.onclick = function(e) {
+        if(e) e.preventDefault();
         generarCodigo();
-      });
+      };
     }
-  });
+  }
 
-  // ── ENVIAR SOLICITUD ─────────────────────────────────────────
+  // ── 2. ENVIAR SOLICITUD (Con bypass de emergencia para WhatsApp) ──
   async function enviarSolicitud() {
     const nombre  = document.getElementById('nombre').value.trim();
     const cedula  = document.getElementById('cedula').value.trim();
@@ -428,7 +430,7 @@
     if (errEl) errEl.classList.remove('show');
     if (okEl) okEl.classList.remove('show');
 
-    // Validaciones básicas
+    // Validaciones de campos vacíos
     if (!nombre || !cedula || !celular || !motivo) {
       if (errEl) {
         errEl.textContent = '⚠️ Por favor complete todos los campos obligatorios.';
@@ -437,6 +439,7 @@
       return;
     }
     
+    // Validación de cédula ecuatoriana (longitud)
     if (!/^\d{10,13}$/.test(cedula.replace(/-/g,''))) {
       if (errEl) {
         errEl.textContent = '⚠️ La cédula debe tener entre 10 y 13 dígitos.';
@@ -446,86 +449,67 @@
     }
 
     const btn = document.querySelector('.btn-submit');
-    const originalBtnText = btn.innerHTML;
+    const originalBtnHTML = btn.innerHTML;
     
     btn.disabled = true;
-    btn.textContent = 'Guardando…';
+    btn.textContent = 'Procesando...';
 
-    let procedioConExito = false;
-
-    // Guardar en Supabase (si está disponible)
-    if (supabase) {
-      try {
-        const { error } = await supabase.from('consultas').insert([{
+    // Intentar guardar en Supabase de manera aislada
+    try {
+      if (window.supabase) {
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const { error } = await supabaseClient.from('consultas').insert([{
           nombre, cedula, celular, motivo, codigo,
           estado: 'pendiente',
           fecha: new Date().toISOString()
         }]);
 
         if (error) {
-          console.error("Error de base de datos:", error);
-          if (errEl) {
-            errEl.textContent = '❌ Error al registrar en base de datos: ' + error.message;
-            errEl.classList.add('show');
-          }
-          btn.disabled = false;
-          btn.innerHTML = originalBtnText;
-          return; // Detiene si hay error en Supabase para no duplicar u omitir control
+          console.warn("Supabase devolvió error, pero redirigiremos a WhatsApp igual:", error);
         }
-        procedioConExito = true;
-      } catch (err) {
-        console.error("Error de conexión:", err);
-        if (errEl) {
-          errEl.textContent = '❌ Fallo de conexión con el servidor.';
-          errEl.classList.add('show');
-        }
-        btn.disabled = false;
-        btn.innerHTML = originalBtnText;
-        return;
+      } else {
+        console.warn("La librería de Supabase no está cargada en el navegador.");
       }
-    } else {
-      if (errEl) {
-        errEl.textContent = '❌ El servicio de base de datos no está listo.';
-        errEl.classList.add('show');
-      }
+    } catch (supabaseError) {
+      // Si Supabase falla por red, credenciales o caída, el usuario NO se queda atrapado.
+      console.error("Error crítico de Supabase evitado:", supabaseError);
+    }
+
+    // ── 3. REDIRECCIÓN A WHATSAPP (Garantizada) ──
+    if (okEl) {
+      okEl.textContent = '✅ Abriendo WhatsApp para enviar tu consulta...';
+      okEl.classList.add('show');
+    }
+
+    const fechaActual = new Date().toLocaleDateString('es-EC');
+    const msg = encodeURIComponent(
+      `✅ *SOLICITUD DE CONSULTA – JORGE MEZA ESPÍN*\n` +
+      `————————————————\n` +
+      `📋 *Código:* ${codigo}\n` +
+      `👤 *Nombre:* ${nombre}\n` +
+      `🪪 *Cédula:* ${cedula}\n` +
+      `📱 *Celular:* ${celular}\n` +
+      `📅 *Fecha:* ${fechaActual}\n` +
+      `————————————————\n` +
+      `📝 *Motivo:*\n${motivo}\n` +
+      `————————————————\n` +
+      `_Por favor confirme disponibilidad._`
+    );
+
+    setTimeout(() => {
+      // Abrir la pestaña de WhatsApp
+      window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
+      
+      // Restaurar interfaz y limpiar formulario
       btn.disabled = false;
-      btn.innerHTML = originalBtnText;
-      return;
-    }
-
-    // Si todo salió bien con Supabase, procedemos a WhatsApp
-    if (procedioConExito) {
-      if (okEl) okEl.classList.add('show');
-
-      const fechaActual = new Date().toLocaleDateString('es-EC');
-      const msg = encodeURIComponent(
-        `✅ *SOLICITUD DE CONSULTA – JORGE MEZA ESPÍN*\n` +
-        `————————————————\n` +
-        `📋 *Código:* ${codigo}\n` +
-        `👤 *Nombre:* ${nombre}\n` +
-        `🪪 *Cédula:* ${cedula}\n` +
-        `📱 *Celular:* ${celular}\n` +
-        `📅 *Fecha:* ${fechaActual}\n` +
-        `————————————————\n` +
-        `📝 *Motivo:*\n${motivo}\n` +
-        `————————————————\n` +
-        `_Por favor confirme disponibilidad._`
-      );
-
-      setTimeout(() => {
-        window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
-        
-        // Restaurar botón y limpiar formulario
-        btn.disabled = false;
-        btn.innerHTML = originalBtnText;
-        
-        document.getElementById('nombre').value = '';
-        document.getElementById('cedula').value = '';
-        document.getElementById('celular').value = '';
-        document.getElementById('motivo').value = '';
-        generarCodigo();
-      }, 800);
-    }
+      btn.innerHTML = originalBtnHTML;
+      
+      document.getElementById('nombre').value = '';
+      document.getElementById('cedula').value = '';
+      document.getElementById('celular').value = '';
+      document.getElementById('motivo').value = '';
+      generarCodigo();
+    }, 600);
   }
 </script>
 </body>
