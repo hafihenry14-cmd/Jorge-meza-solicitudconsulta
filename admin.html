@@ -147,7 +147,7 @@
     }
     .btn-refresh:hover { background: #E5E7EB; }
 
-    /* ── TABLA RESPONSIVA MÁGICA ── */
+    /* ── TABLA RESPONSIVA ── */
     .table-wrap { background: var(--white); border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.06); overflow: hidden; width: 100%; }
     table { width: 100%; border-collapse: collapse; font-size: .85rem; }
     thead { background: var(--navy); color: var(--white); }
@@ -156,40 +156,12 @@
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #F8FAFC; }
 
-    /* Configuración para Celulares / Pantallas chicas */
     @media (max-width: 767px) {
-      table, thead, tbody, th, td, tr { 
-        display: block; 
-      }
-      thead tr { 
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-      }
-      tr {
-        border-bottom: 2px solid var(--border);
-        padding: 1rem 0;
-        background: var(--white);
-      }
-      td { 
-        border: none;
-        position: relative;
-        padding-left: 45% !important;
-        text-align: left !important;
-        margin-bottom: 0.5rem;
-        white-space: normal !important;
-      }
-      td::before { 
-        position: absolute;
-        left: 1rem;
-        width: 40%; 
-        padding-right: 10px; 
-        white-space: nowrap;
-        font-weight: 600;
-        color: var(--gray);
-        font-size: 0.85rem;
-      }
-      /* Mapeo dinámico de títulos en móvil */
+      table, thead, tbody, th, td, tr { display: block; }
+      thead tr { position: absolute; top: -9999px; left: -9999px; }
+      tr { border-bottom: 2px solid var(--border); padding: 1rem 0; background: var(--white); }
+      td { border: none; position: relative; padding-left: 45% !important; text-align: left !important; margin-bottom: 0.5rem; white-space: normal !important; }
+      td::before { position: absolute; left: 1rem; width: 40%; padding-right: 10px; white-space: nowrap; font-weight: 600; color: var(--gray); font-size: 0.85rem; }
       td:nth-of-type(1)::before { content: "Código:"; }
       td:nth-of-type(2)::before { content: "Cliente:"; }
       td:nth-of-type(3)::before { content: "Cédula:"; }
@@ -197,12 +169,7 @@
       td:nth-of-type(5)::before { content: "Fecha:"; }
       td:nth-of-type(6)::before { content: "Estado:"; }
       td:nth-of-type(7)::before { content: "Acciones:"; }
-
-      .actions {
-        margin-top: 0.5rem;
-        padding-top: 0.5rem;
-        border-top: 1px dashed var(--border);
-      }
+      .actions { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed var(--border); }
     }
 
     .badge {
@@ -226,6 +193,7 @@
     .btn-approve  { background: var(--approvedbg); color: var(--approved); }
     .btn-reject   { background: var(--rejectedbg); color: var(--rejected); }
     .btn-wa       { background: #D1FAE5; color: #065F46; }
+    .btn-delete   { background: #FEE2E2; color: #B91C1C; } /* Estilo para el botón eliminar */
 
     .empty-state { text-align: center; padding: 3rem; color: var(--gray); }
     .empty-state svg { margin-bottom: .8rem; opacity: .4; }
@@ -266,28 +234,17 @@
     .modal-field select:focus { border-color: var(--gold); }
     .modal-field textarea { resize: vertical; min-height: 80px; }
     
-    .modal-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-    @media (min-width: 480px) {
-      .modal-grid { grid-template-columns: 1fr 1fr; }
-    }
+    .modal-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+    @media (min-width: 480px) { .modal-grid { grid-template-columns: 1fr 1fr; } }
     .modal-actions { display: flex; gap: .75rem; justify-content: flex-end; padding-top: .5rem; flex-wrap: wrap; }
     .modal-actions button { flex: 1; }
-    @media (min-width: 480px) {
-      .modal-actions button { flex: none; }
-    }
+    @media (min-width: 480px) { .modal-actions button { flex: none; } }
     .btn-save {
       background: var(--navy); color: var(--white); border: none;
       border-radius: 6px; padding: .6rem 1.4rem; font-weight: 600; cursor: pointer; transition: background .2s;
     }
     .btn-save:hover { background: var(--navy2); }
-    .btn-cancel {
-      background: var(--cream); border: 1.5px solid var(--border);
-      border-radius: 6px; padding: .6rem 1.2rem; cursor: pointer; font-size: .9rem;
-    }
+    .btn-cancel { background: var(--cream); border: 1.5px solid var(--border); border-radius: 6px; padding: .6rem 1.2rem; cursor: pointer; font-size: .9rem; }
 
     /* Toast */
     .toast {
@@ -302,6 +259,7 @@
 </head>
 <body>
 
+<!-- ── LOGIN ── -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">JM</div>
@@ -320,6 +278,7 @@
   </div>
 </div>
 
+<!-- ── ADMIN ── -->
 <div id="admin-screen">
   <div class="top-bar">
     <div class="top-bar-left">
@@ -334,6 +293,7 @@
   </div>
 
   <div class="main">
+    <!-- Stats -->
     <div class="stats">
       <div class="stat-card gold">
         <div class="stat-num" id="stat-total">–</div>
@@ -353,6 +313,7 @@
       </div>
     </div>
 
+    <!-- Toolbar -->
     <div class="toolbar">
       <div class="search-box">
         <input type="text" id="search-input" placeholder="🔍  Buscar nombre, cédula, código…" oninput="filtrar()" />
@@ -366,6 +327,7 @@
       <button class="btn-refresh" onclick="cargarConsultas()">↻ Actualizar</button>
     </div>
 
+    <!-- Table -->
     <div class="table-wrap">
       <table>
         <thead>
@@ -387,6 +349,7 @@
   </div>
 </div>
 
+<!-- MODAL EDITAR -->
 <div class="modal-bg" id="modal-bg" onclick="if(event.target===this)cerrarModal()">
   <div class="modal">
     <div class="modal-head">
@@ -443,7 +406,6 @@
   // ── CONFIG ─────────────────────────────────────────────────
   const SUPABASE_URL = 'https://ctbnbikbwgujqglcobcl.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Ym5iaWtid2d1anFnbGNvYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTk3MzQsImV4cCI6MjA5Nzc3NTczNH0.MbaUNGXZ5HEihaQDPXjERxirOLncfe52kqoBrEJhBZw';
-  const WA_NUMBER   = '593978973366';
   
   const ADMIN_USER = 'jorgemeza.ec';
   const ADMIN_PASS = 'admin123';
@@ -552,6 +514,8 @@
             ${r.estado!=='aprobada' ? `<button class="action-btn btn-approve" onclick="cambiarEstado('${r.id}','aprobada')">✅</button>` : ''}
             ${r.estado!=='rechazada' ? `<button class="action-btn btn-reject" onclick="cambiarEstado('${r.id}','rechazada')">❌</button>` : ''}
             <button class="action-btn btn-wa" onclick='enviarWA(${JSON.stringify(r)})'>💬</button>
+            <!-- El botón de eliminar solo aparece si el estado es estrictamente 'rechazada' -->
+            ${r.estado === 'rechazada' ? `<button class="action-btn btn-delete" onclick="eliminarConsulta('${r.id}', '${r.codigo}')">🗑️ Eliminar</button>` : ''}
           </div>
         </td>
       </tr>`;
@@ -590,6 +554,28 @@
         enviarWA(registroActualizado);
       }, 500);
     }
+  }
+
+  // ── ELIMINAR SOLICITUD ───────────────────
+  async function eliminarConsulta(id, codigo) {
+    const confirmar = confirm(`¿Está seguro de que desea eliminar permanentemente la solicitud ${codigo}? Esta acción no se puede deshacer.`);
+    if (!confirmar) return;
+
+    const { error } = await sb
+      .from('consultas')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast('❌ Error al eliminar: ' + error.message);
+      return;
+    }
+
+    // Filtrar localmente el elemento borrado para no volver a consultar toda la BD
+    todasConsultas = todasConsultas.filter(r => r.id !== id);
+    actualizarStats();
+    renderTabla();
+    toast(`🗑️ Solicitud ${codigo} eliminada correctamente`);
   }
 
   // ── MODAL ────────────────────────────────────────────────────
