@@ -416,7 +416,7 @@
     }
   }
 
-  // ── 2. ENVIAR SOLICITUD (Con bypass de emergencia para WhatsApp) ──
+// ── ENVIAR SOLICITUD (Con ventana emergente de revisión) ──
   async function enviarSolicitud() {
     const nombre  = document.getElementById('nombre').value.trim();
     const cedula  = document.getElementById('cedula').value.trim();
@@ -430,7 +430,7 @@
     if (errEl) errEl.classList.remove('show');
     if (okEl) okEl.classList.remove('show');
 
-    // Validaciones de campos vacíos
+    // 1. Validaciones de campos vacíos
     if (!nombre || !cedula || !celular || !motivo) {
       if (errEl) {
         errEl.textContent = '⚠️ Por favor complete todos los campos obligatorios.';
@@ -439,7 +439,7 @@
       return;
     }
     
-    // Validación de cédula ecuatoriana (longitud)
+    // 2. Validación de cédula (longitud)
     if (!/^\d{10,13}$/.test(cedula.replace(/-/g,''))) {
       if (errEl) {
         errEl.textContent = '⚠️ La cédula debe tener entre 10 y 13 dígitos.';
@@ -448,6 +448,21 @@
       return;
     }
 
+    // 3. 🚨 VENTANA EMERGENTE DE CONFIRMACIÓN 🚨
+    const mensajeConfirmacion = 
+      `🔍 POR FAVOR, REVISE SUS DATOS ANTES DE ENVIAR:\n\n` +
+      `• Nombre: ${nombre}\n` +
+      `• Cédula: ${cedula}\n` +
+      `• Celular/WhatsApp: ${celular}\n` +
+      `• Código de Solicitud: ${codigo}\n\n` +
+      `¿Los datos son correctos? Presione ACENTAR para proceder con el envío de su consulta.`;
+
+    // Si el usuario presiona "Cancelar", detenemos la ejecución aquí mismo
+    if (!confirm(mensajeConfirmacion)) {
+      return; 
+    }
+
+    // 4. PROCESO DE ENVÍO (Si el usuario aceptó)
     const btn = document.querySelector('.btn-submit');
     const originalBtnHTML = btn.innerHTML;
     
@@ -467,15 +482,12 @@
         if (error) {
           console.warn("Supabase devolvió error, pero redirigiremos a WhatsApp igual:", error);
         }
-      } else {
-        console.warn("La librería de Supabase no está cargada en el navegador.");
       }
     } catch (supabaseError) {
-      // Si Supabase falla por red, credenciales o caída, el usuario NO se queda atrapado.
       console.error("Error crítico de Supabase evitado:", supabaseError);
     }
 
-    // ── 3. REDIRECCIÓN A WHATSAPP (Garantizada) ──
+    // Redirección a WhatsApp
     if (okEl) {
       okEl.textContent = '✅ Abriendo WhatsApp para enviar tu consulta...';
       okEl.classList.add('show');
@@ -486,7 +498,7 @@
       `✅ *SOLICITUD DE CONSULTA – JORGE MEZA ESPÍN*\n` +
       `————————————————\n` +
       `📋 *Código:* ${codigo}\n` +
-      `👤 *Nombre:* ${nombre}\n` +
+      `👤 *Cliente:* ${nombre}\n` +
       `🪪 *Cédula:* ${cedula}\n` +
       `📱 *Celular:* ${celular}\n` +
       `📅 *Fecha:* ${fechaActual}\n` +
@@ -497,10 +509,8 @@
     );
 
     setTimeout(() => {
-      // Abrir la pestaña de WhatsApp
       window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
       
-      // Restaurar interfaz y limpiar formulario
       btn.disabled = false;
       btn.innerHTML = originalBtnHTML;
       
