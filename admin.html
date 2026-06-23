@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Administrativo — Jorge Meza Espín</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --navy:    #1B2A4A;
+      --navy2:   #243860;
+      --gold:    #C9A84C;
+      --cream:   #F8F5EF;
+      --white:   #FFFFFF;
+      --gray:    #6B7280;
+      --border:  #E5E7EB;
+      --pending: #92400E;
+      --pendingbg:#FEF3C7;
+      --approved:#065F46;
+      --approvedbg:#D1FAE5;
+      --rejected:#991B1B;
+      --rejectedbg:#FEE2E2;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #F1F5F9; color: #1E293B; min-height: 100vh; }
+
+    /* ── LOGIN ── */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+    }
+    .login-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 3rem 2.5rem;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      text-align: center;
+    }
+    .login-logo {
+      width: 56px; height: 56px;
+      background: var(--gold);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0 auto 1.5rem;
+    }
+    .login-card h1 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--navy); margin-bottom: .3rem; }
+    .login-card p  { font-size: .82rem; color: var(--gray); margin-bottom: 2rem; }
+    .login-field   { text-align: left; margin-bottom: 1.1rem; }
+    .login-field label { display: block; font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--navy); margin-bottom: .4rem; }
+    .login-field input {
+      width: 100%; border: 1.5px solid #D1D5DB; border-radius: 6px;
+      padding: .65rem .9rem; font-size: .92rem; outline: none; transition: border-color .2s;
+    }
+    .login-field input:focus { border-color: var(--gold); }
+    .btn-login {
+      width: 100%; padding: .8rem; background: var(--navy); color: var(--white);
+      border: none; border-radius: 8px; font-size: .95rem; font-weight: 600;
+      cursor: pointer; transition: background .2s; margin-top: .5rem;
+    }
+    .btn-login:hover { background: var(--navy2); }
+    .login-err { font-size: .8rem; color: #B91C1C; margin-top: .8rem; display: none; }
+
+    /* ── MAIN LAYOUT ── */
+    #admin-screen { display: none; }
+
+    .top-bar {
+      background: var(--navy);
+      color: var(--white);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem; height: 60px;
+      border-bottom: 3px solid var(--gold);
+    }
+    .top-bar-left { display: flex; align-items: center; gap: .75rem; }
+    .top-logo { width: 36px; height: 36px; background: var(--gold); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-weight: 700; color: var(--navy); font-size: 1.1rem; }
+    .top-bar h2 { font-family: 'Playfair Display', serif; font-size: 1rem; }
+    .top-bar-right { display: flex; align-items: center; gap: 1rem; font-size: .82rem; color: rgba(255,255,255,.7); }
+    .btn-logout { background: none; border: 1px solid rgba(255,255,255,.3); color: rgba(255,255,255,.8); border-radius: 4px; padding: .3rem .7rem; cursor: pointer; font-size: .78rem; }
+    .btn-logout:hover { border-color: var(--gold); color: var(--gold); }
+
+    .main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+
+    /* Stats */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--white); border-radius: 8px; padding: 1.2rem 1.4rem; border-left: 4px solid var(--navy); box-shadow: 0 1px 6px rgba(0,0,0,.06); }
+    .stat-card.gold { border-left-color: var(--gold); }
+    .stat-card.green { border-left-color: #10B981; }
+    .stat-card.red   { border-left-color: #EF4444; }
+    .stat-num { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--navy); }
+    .stat-label { font-size: .75rem; color: var(--gray); margin-top: .2rem; }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+      background: var(--white); border-radius: 8px; padding: 1rem 1.2rem;
+      box-shadow: 0 1px 6px rgba(0,0,0,.06); margin-bottom: 1rem;
+    }
+    .search-box input {
+      border: 1.5px solid #D1D5DB; border-radius: 6px;
+      padding: .55rem .9rem; font-size: .88rem;
+      outline: none; transition: border-color .2s; width: 240px;
+    }
+    .search-box input:focus { border-color: var(--gold); }
+    .filter-tabs { display: flex; gap: .4rem; }
+    .tab {
+      padding: .4rem .9rem; border-radius: 20px; border: 1.5px solid var(--border);
+      background: var(--white); font-size: .8rem; font-weight: 500; cursor: pointer;
+      transition: all .15s; color: var(--gray);
+    }
+    .tab.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+    .tab:hover:not(.active) { border-color: var(--navy); color: var(--navy); }
+    .btn-refresh {
+      background: var(--cream); border: 1.5px solid var(--border);
+      border-radius: 6px; padding: .45rem .8rem; cursor: pointer; font-size: .85rem;
+      transition: background .15s;
+    }
+    .btn-refresh:hover { background: #E5E7EB; }
+
+    /* Table */
+    .table-wrap { background: var(--white); border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.06); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    thead { background: var(--navy); color: var(--white); }
+    th { padding: .85rem 1rem; text-align: left; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; }
+    td { padding: .85rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #F8FAFC; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: .3rem;
+      font-size: .72rem; font-weight: 600; padding: .25rem .65rem;
+      border-radius: 20px; letter-spacing: .04em; text-transform: uppercase;
+    }
+    .badge.pendiente  { background: var(--pendingbg);  color: var(--pending); }
+    .badge.aprobada   { background: var(--approvedbg); color: var(--approved); }
+    .badge.rechazada  { background: var(--rejectedbg); color: var(--rejected); }
+
+    .code-cell { font-family: 'Playfair Display', serif; font-size: .9rem; letter-spacing: .08em; color: var(--navy); font-weight: 600; }
+
+    .actions { display: flex; gap: .4rem; }
+    .action-btn {
+      padding: .3rem .65rem; border: none; border-radius: 4px;
+      cursor: pointer; font-size: .75rem; font-weight: 600; transition: opacity .15s;
+    }
+    .action-btn:hover { opacity: .8; }
+    .btn-view     { background: #DBEAFE; color: #1E40AF; }
+    .btn-approve  { background: var(--approvedbg); color: var(--approved); }
+    .btn-reject   { background: var(--rejectedbg); color: var(--rejected); }
+    .btn-wa       { background: #D1FAE5; color: #065F46; }
+
+    .empty-state { text-align: center; padding: 3rem; color: var(--gray); }
+    .empty-state svg { margin-bottom: .8rem; opacity: .4; }
+
+    /* MODAL */
+    .modal-bg {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.5); z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: var(--white); border-radius: 12px;
+      width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3); animation: slideUp .2s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border);
+      background: var(--navy); color: var(--white); border-radius: 12px 12px 0 0;
+    }
+    .modal-head h3 { font-family: 'Playfair Display', serif; font-size: 1.05rem; }
+    .modal-close { background: none; border: none; color: rgba(255,255,255,.7); font-size: 1.4rem; cursor: pointer; line-height: 1; }
+    .modal-body { padding: 1.5rem; }
+    .modal-field { margin-bottom: 1.1rem; }
+    .modal-field label { display: block; font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); margin-bottom: .35rem; }
+    .modal-field input,
+    .modal-field textarea,
+    .modal-field select {
+      width: 100%; border: 1.5px solid #D1D5DB; border-radius: 6px;
+      padding: .6rem .85rem; font-size: .9rem; outline: none; transition: border-color .2s;
+      font-family: 'Inter', sans-serif;
+    }
+    .modal-field input:focus,
+    .modal-field textarea:focus,
+    .modal-field select:focus { border-color: var(--gold); }
+    .modal-field textarea { resize: vertical; min-height: 80px; }
+    .modal-actions { display: flex; gap: .75rem; justify-content: flex-end; padding-top: .5rem; }
+    .btn-save {
+      background: var(--navy); color: var(--white); border: none;
+      border-radius: 6px; padding: .6rem 1.4rem; font-weight: 600; cursor: pointer; transition: background .2s;
+    }
+    .btn-save:hover { background: var(--navy2); }
+    .btn-cancel {
+      background: var(--cream); border: 1.5px solid var(--border);
+      border-radius: 6px; padding: .6rem 1.2rem; cursor: pointer; font-size: .9rem;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 2000;
+      background: var(--navy); color: var(--white); padding: .8rem 1.3rem;
+      border-radius: 8px; font-size: .88rem; box-shadow: 0 8px 24px rgba(0,0,0,.2);
+      opacity: 0; transition: opacity .3s; pointer-events: none;
+      border-left: 4px solid var(--gold);
+    }
+    .toast.show { opacity: 1; }
+
+    @media(max-width:640px){
+      th:nth-child(4), td:nth-child(4),
+      th:nth-child(5), td:nth-child(5) { display: none; }
+      .search-box input { width: 160px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">JM</div>
+    <h1>Panel Administrativo</h1>
+    <p>Estudio Jurídico Jorge Meza Espín</p>
+    <div class="login-field">
+      <label>Correo electrónico</label>
+      <input type="email" id="login-email" placeholder="admin@jorgomeza.ec" />
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()" />
+    </div>
+    <button class="btn-login" onclick="doLogin()">Ingresar</button>
+    <div class="login-err" id="login-err">Credenciales incorrectas. Intente de nuevo.</div>
+  </div>
+</div>
+
+<!-- ── ADMIN ── -->
+<div id="admin-screen">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="top-logo">JM</div>
+      <h2>Panel de Consultas</h2>
+    </div>
+    <div class="top-bar-right">
+      <span id="admin-email-label"></span>
+      <a href="index.html" style="color:rgba(255,255,255,.6);font-size:.78rem;text-decoration:none;">← Página pública</a>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card gold">
+        <div class="stat-num" id="stat-total">–</div>
+        <div class="stat-label">Total solicitudes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-pending">–</div>
+        <div class="stat-label">Pendientes</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-num" id="stat-approved">–</div>
+        <div class="stat-label">Aprobadas</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-num" id="stat-rejected">–</div>
+        <div class="stat-label">Rechazadas</div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="🔍  Buscar nombre, cédula, código…" oninput="filtrar()" />
+      </div>
+      <div class="filter-tabs">
+        <div class="tab active" onclick="setTab('todos',this)">Todas</div>
+        <div class="tab" onclick="setTab('pendiente',this)">Pendientes</div>
+        <div class="tab" onclick="setTab('aprobada',this)">Aprobadas</div>
+        <div class="tab" onclick="setTab('rechazada',this)">Rechazadas</div>
+      </div>
+      <button class="btn-refresh" onclick="cargarConsultas()">↻ Actualizar</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Cédula</th>
+            <th>Celular</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-body">
+          <tr><td colspan="7" class="empty-state">Cargando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)cerrarModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">Detalle de consulta</h3>
+      <button class="modal-close" onclick="cerrarModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="m-id" />
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="modal-field">
+          <label>Nombre</label>
+          <input type="text" id="m-nombre" />
+        </div>
+        <div class="modal-field">
+          <label>Cédula</label>
+          <input type="text" id="m-cedula" />
+        </div>
+        <div class="modal-field">
+          <label>Celular</label>
+          <input type="tel" id="m-celular" />
+        </div>
+        <div class="modal-field">
+          <label>Código</label>
+          <input type="text" id="m-codigo" readonly style="background:#F9FAFB" />
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Motivo de consulta</label>
+        <textarea id="m-motivo" rows="4"></textarea>
+      </div>
+      <div class="modal-field">
+        <label>Estado</label>
+        <select id="m-estado">
+          <option value="pendiente">Pendiente</option>
+          <option value="aprobada">Aprobada</option>
+          <option value="rechazada">Rechazada</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Notas internas</label>
+        <textarea id="m-notas" rows="3" placeholder="Observaciones del abogado…"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+        <button class="btn-save" onclick="guardarCambios()">💾 Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── CONFIG ─────────────────────────────────────────────────
+  const SUPABASE_URL = 'https://ctbnbikbwgujqglcobcl.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Ym5iaWtid2d1anFnbGNvYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTk3MzQsImV4cCI6MjA5Nzc3NTczNH0.MbaUNGXZ5HEihaQDPXjERxirOLncfe52kqoBrEJhBZw';
+  const WA_NUMBER   = '593978973366';
+  // Credenciales de admin (puedes usar Supabase Auth en su lugar)
+  const ADMIN_USER = 'jorgemeza.ec';
+  const ADMIN_PASS = 'admin123';
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let todasConsultas = [];
+  let filtroActual   = 'todos';
+
+  // ── LOGIN ───────────────────────────────────────────────────
+  function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const pass  = document.getElementById('login-pass').value;
+    const err   = document.getElementById('login-err');
+
+    if (email === ADMIN_USER && pass === ADMIN_PASS) {
+      sessionStorage.setItem('jm_admin', email);
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-screen').style.display = 'block';
+      document.getElementById('admin-email-label').textContent = email;
+      cargarConsultas();
+    } else {
+      err.style.display = 'block';
+      setTimeout(() => err.style.display = 'none', 3000);
+    }
+  }
+
+  function doLogout() {
+    sessionStorage.removeItem('jm_admin');
+    document.getElementById('admin-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+
+  // Auto-login si ya hay sesión
+  window.addEventListener('DOMContentLoaded', () => {
+    const s = sessionStorage.getItem('jm_admin');
+    if (s) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-screen').style.display = 'block';
+      document.getElementById('admin-email-label').textContent = s;
+      cargarConsultas();
+    }
+  });
+
+  // ── CARGAR ──────────────────────────────────────────────────
+  async function cargarConsultas() {
+    const tbody = document.getElementById('tabla-body');
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Cargando datos…</td></tr>';
+
+    const { data, error } = await sb
+      .from('consultas')
+      .select('*')
+      .order('fecha', { ascending: false });
+
+    if (error) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty-state" style="color:#B91C1C">Error: ${error.message}</td></tr>`;
+      return;
+    }
+
+    todasConsultas = data || [];
+    actualizarStats();
+    renderTabla();
+  }
+
+  function actualizarStats() {
+    const t = todasConsultas;
+    document.getElementById('stat-total').textContent    = t.length;
+    document.getElementById('stat-pending').textContent  = t.filter(r=>r.estado==='pendiente').length;
+    document.getElementById('stat-approved').textContent = t.filter(r=>r.estado==='aprobada').length;
+    document.getElementById('stat-rejected').textContent = t.filter(r=>r.estado==='rechazada').length;
+  }
+
+  function renderTabla() {
+    const q      = document.getElementById('search-input').value.toLowerCase();
+    const tbody  = document.getElementById('tabla-body');
+
+    let filas = todasConsultas
+      .filter(r => filtroActual === 'todos' || r.estado === filtroActual)
+      .filter(r =>
+        !q ||
+        r.nombre.toLowerCase().includes(q) ||
+        r.cedula.includes(q) ||
+        r.codigo.toLowerCase().includes(q) ||
+        r.celular.includes(q)
+      );
+
+    if (!filas.length) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <p>No hay consultas para mostrar</p>
+      </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filas.map(r => {
+      const fecha = r.fecha ? new Date(r.fecha).toLocaleDateString('es-EC', {day:'2-digit',month:'short',year:'numeric'}) : '—';
+      return `<tr>
+        <td><span class="code-cell">${r.codigo}</span></td>
+        <td>${esc(r.nombre)}</td>
+        <td>${esc(r.cedula)}</td>
+        <td>${esc(r.celular)}</td>
+        <td>${fecha}</td>
+        <td><span class="badge ${r.estado}">${estadoLabel(r.estado)}</span></td>
+        <td>
+          <div class="actions">
+            <button class="action-btn btn-view" onclick='abrirModal(${JSON.stringify(r)})'>✏️ Ver/Editar</button>
+            ${r.estado!=='aprobada' ? `<button class="action-btn btn-approve" onclick="cambiarEstado('${r.id}','aprobada')">✅</button>` : ''}
+            ${r.estado!=='rechazada' ? `<button class="action-btn btn-reject" onclick="cambiarEstado('${r.id}','rechazada')">❌</button>` : ''}
+            <button class="action-btn btn-wa" onclick="enviarWA(${JSON.stringify(r)})">💬</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function estadoLabel(e) {
+    return { pendiente:'⏳ Pendiente', aprobada:'✅ Aprobada', rechazada:'❌ Rechazada' }[e] || e;
+  }
+  function esc(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function setTab(val, el) {
+    filtroActual = val;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderTabla();
+  }
+
+  function filtrar() { renderTabla(); }
+
+  // ── CAMBIAR ESTADO RÁPIDO ────────────────────────────────────
+  async function cambiarEstado(id, nuevoEstado) {
+    const { error } = await sb.from('consultas').update({ estado: nuevoEstado }).eq('id', id);
+    if (error) { toast('❌ Error: ' + error.message); return; }
+    todasConsultas = todasConsultas.map(r => r.id === id ? {...r, estado: nuevoEstado} : r);
+    actualizarStats();
+    renderTabla();
+    toast(nuevoEstado === 'aprobada' ? '✅ Consulta aprobada' : '❌ Consulta rechazada');
+  }
+
+  // ── MODAL ────────────────────────────────────────────────────
+  function abrirModal(r) {
+    document.getElementById('m-id').value     = r.id;
+    document.getElementById('m-nombre').value = r.nombre;
+    document.getElementById('m-cedula').value = r.cedula;
+    document.getElementById('m-celular').value= r.celular;
+    document.getElementById('m-codigo').value = r.codigo;
+    document.getElementById('m-motivo').value = r.motivo;
+    document.getElementById('m-estado').value = r.estado;
+    document.getElementById('m-notas').value  = r.notas || '';
+    document.getElementById('modal-title').textContent = `Consulta — ${r.codigo}`;
+    document.getElementById('modal-bg').classList.add('open');
+  }
+
+  function cerrarModal() {
+    document.getElementById('modal-bg').classList.remove('open');
+  }
+
+  async function guardarCambios() {
+    const id     = document.getElementById('m-id').value;
+    const update = {
+      nombre:  document.getElementById('m-nombre').value.trim(),
+      cedula:  document.getElementById('m-cedula').value.trim(),
+      celular: document.getElementById('m-celular').value.trim(),
+      motivo:  document.getElementById('m-motivo').value.trim(),
+      estado:  document.getElementById('m-estado').value,
+      notas:   document.getElementById('m-notas').value.trim(),
+    };
+
+    const { error } = await sb.from('consultas').update(update).eq('id', id);
+    if (error) { toast('❌ Error: ' + error.message); return; }
+
+    todasConsultas = todasConsultas.map(r => r.id === id ? {...r, ...update} : r);
+    actualizarStats();
+    renderTabla();
+    cerrarModal();
+    toast('💾 Cambios guardados correctamente');
+  }
+
+  // ── WHATSAPP ─────────────────────────────────────────────────
+  function enviarWA(r) {
+    const estadoTexto = { pendiente:'PENDIENTE ⏳', aprobada:'APROBADA ✅', rechazada:'RECHAZADA ❌' }[r.estado];
+    const msg = encodeURIComponent(
+      `*ESTUDIO JURÍDICO JORGE MEZA ESPÍN*\n` +
+      `Estimado/a ${r.nombre},\n\n` +
+      `Su solicitud con código *${r.codigo}* ha sido revisada.\n` +
+      `Estado actual: *${estadoTexto}*\n\n` +
+      `${r.notas ? '📋 Nota: ' + r.notas + '\n\n' : ''}` +
+      `Por favor contáctenos al responder este mensaje si tiene alguna consulta adicional.\n\n` +
+      `_Atte. Estudio Jurídico Jorge Meza Espín_`
+    );
+    window.open(`https://wa.me/${r.celular.replace(/\D/g,'')}?text=${msg}`, '_blank');
+  }
+
+  // ── TOAST ────────────────────────────────────────────────────
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>
