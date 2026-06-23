@@ -7,117 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ── OPTIMIZACIÓN RESPONSIVE GENERAL ── */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 1rem; /* Reducido para pantallas pequeñas */
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Se adapta al ancho disponible */
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .header-panel {
-      display: flex;
-      flex-direction: column; /* Por defecto en fila vertical para móviles */
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    /* En pantallas medianas/grandes, el encabezado se alinea horizontalmente */
-    @media (min-width: 768px) {
-      .container { padding: 2rem; }
-      .header-panel {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-      }
-    }
-
-    /* ── TABLA ADAPTABLE (MÁGICA PARA MÓVILES) ── */
-    .table-wrapper {
-      width: 100%;
-      background: var(--white);
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-      border: 1px solid var(--border);
-      overflow: hidden;
-    }
-
-    /* Reglas para pantallas de celular (menos de 768px) */
-    @media (max-width: 767px) {
-      table, thead, tbody, th, td, tr { 
-        display: block; /* Transforma la estructura en bloques verticales */
-      }
-      
-      /* Esconde los encabezados originales de la tabla */
-      thead tr { 
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-      }
-      
-      tr {
-        border-bottom: 2px solid var(--border);
-        padding: 1rem 0;
-        background: var(--white);
-      }
-      
-      td { 
-        border: none;
-        position: relative;
-        padding-left: 45% !important; /* Deja espacio para el título a la izquierda */
-        text-align: left !important;
-        margin-bottom: 0.5rem;
-        white-space: normal !important; /* Evita que el texto largo se corte */
-      }
-      
-      /* Inyecta de forma dinámica títulos simulados antes de cada dato */
-      td::before { 
-        position: absolute;
-        left: 1rem;
-        width: 40%; 
-        padding-right: 10px; 
-        white-space: nowrap;
-        font-weight: 600;
-        color: var(--gray);
-        font-size: 0.85rem;
-      }
-      
-      /* Mapeo de columnas mediante el atributo data-label */
-      td:nth-of-type(1)::before { content: "Código:"; }
-      td:nth-of-type(2)::before { content: "Cliente:"; }
-      td:nth-of-type(3)::before { content: "Cédula:"; }
-      td:nth-of-type(4)::before { content: "Celular:"; }
-      td:nth-of-type(5)::before { content: "Motivo:"; }
-      td:nth-of-type(6)::before { content: "Estado:"; }
-      td:nth-of-type(7)::before { content: "Acciones:"; }
-
-      /* Ajuste especial para los botones de acción en móviles */
-      .actions-cell {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-        margin-top: 0.75rem;
-        padding-top: 0.75rem;
-        border-top: 1px dashed var(--border);
-      }
-    }
-
-    /* ── MODAL RESPONSIVE ── */
-    .modal-content {
-      background: var(--white);
-      padding: 1.5rem;
-      border-radius: 8px;
-      width: 95%; /* Ocupa casi todo el ancho en móviles */
-      max-width: 600px; /* No se desborda en PC */
-      max-height: 90vh;
-      overflow-y: auto; /* Permite scroll si el formulario es muy largo */
-    }
     :root {
       --navy:    #1B2A4A;
       --navy2:   #243860;
@@ -133,6 +22,7 @@
       --rejected:#991B1B;
       --rejectedbg:#FEE2E2;
     }
+    
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: #F1F5F9; color: #1E293B; min-height: 100vh; }
 
@@ -181,27 +71,37 @@
     .btn-login:hover { background: var(--navy2); }
     .login-err { font-size: .8rem; color: #B91C1C; margin-top: .8rem; display: none; }
 
-    /* ── MAIN LAYOUT ── */
+    /* ── MAIN LAYOUT RESPONSIVO ── */
     #admin-screen { display: none; }
 
     .top-bar {
       background: var(--navy);
       color: var(--white);
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 1.5rem; height: 60px;
+      padding: 0 1.5rem; min-height: 60px;
       border-bottom: 3px solid var(--gold);
+      flex-wrap: wrap;
+      gap: 0.5rem;
     }
     .top-bar-left { display: flex; align-items: center; gap: .75rem; }
     .top-logo { width: 36px; height: 36px; background: var(--gold); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-weight: 700; color: var(--navy); font-size: 1.1rem; }
     .top-bar h2 { font-family: 'Playfair Display', serif; font-size: 1rem; }
-    .top-bar-right { display: flex; align-items: center; gap: 1rem; font-size: .82rem; color: rgba(255,255,255,.7); }
+    .top-bar-right { display: flex; align-items: center; gap: 1rem; font-size: .82rem; color: rgba(255,255,255,.7); flex-wrap: wrap; }
     .btn-logout { background: none; border: 1px solid rgba(255,255,255,.3); color: rgba(255,255,255,.8); border-radius: 4px; padding: .3rem .7rem; cursor: pointer; font-size: .78rem; }
     .btn-logout:hover { border-color: var(--gold); color: var(--gold); }
 
-    .main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+    .main { max-width: 1100px; margin: 0 auto; padding: 1rem; }
+    @media (min-width: 768px) {
+      .main { padding: 1.5rem; }
+    }
 
-    /* Stats */
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    /* Grilla de Estadísticas Adaptable */
+    .stats { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+      gap: 1rem; 
+      margin-bottom: 1.5rem; 
+    }
     .stat-card { background: var(--white); border-radius: 8px; padding: 1.2rem 1.4rem; border-left: 4px solid var(--navy); box-shadow: 0 1px 6px rgba(0,0,0,.06); }
     .stat-card.gold { border-left-color: var(--gold); }
     .stat-card.green { border-left-color: #10B981; }
@@ -209,20 +109,26 @@
     .stat-num { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--navy); }
     .stat-label { font-size: .75rem; color: var(--gray); margin-top: .2rem; }
 
-    /* Toolbar */
+    /* Barra de herramientas / Toolbar */
     .toolbar {
       display: flex; align-items: center; justify-content: space-between;
       flex-wrap: wrap; gap: 1rem;
       background: var(--white); border-radius: 8px; padding: 1rem 1.2rem;
       box-shadow: 0 1px 6px rgba(0,0,0,.06); margin-bottom: 1rem;
     }
+    .search-box { width: 100%; }
     .search-box input {
       border: 1.5px solid #D1D5DB; border-radius: 6px;
       padding: .55rem .9rem; font-size: .88rem;
-      outline: none; transition: border-color .2s; width: 240px;
+      outline: none; transition: border-color .2s; width: 100%;
+    }
+    @media (min-width: 768px) {
+      .search-box { width: auto; }
+      .search-box input { width: 240px; }
     }
     .search-box input:focus { border-color: var(--gold); }
-    .filter-tabs { display: flex; gap: .4rem; }
+    
+    .filter-tabs { display: flex; gap: .4rem; flex-wrap: wrap; }
     .tab {
       padding: .4rem .9rem; border-radius: 20px; border: 1.5px solid var(--border);
       background: var(--white); font-size: .8rem; font-weight: 500; cursor: pointer;
@@ -230,21 +136,74 @@
     }
     .tab.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
     .tab:hover:not(.active) { border-color: var(--navy); color: var(--navy); }
+    
     .btn-refresh {
       background: var(--cream); border: 1.5px solid var(--border);
       border-radius: 6px; padding: .45rem .8rem; cursor: pointer; font-size: .85rem;
-      transition: background .15s;
+      transition: background .15s; width: 100%; text-align: center;
+    }
+    @media (min-width: 640px) {
+      .btn-refresh { width: auto; }
     }
     .btn-refresh:hover { background: #E5E7EB; }
 
-    /* Table */
-    .table-wrap { background: var(--white); border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.06); overflow: hidden; }
+    /* ── TABLA RESPONSIVA MÁGICA ── */
+    .table-wrap { background: var(--white); border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.06); overflow: hidden; width: 100%; }
     table { width: 100%; border-collapse: collapse; font-size: .85rem; }
     thead { background: var(--navy); color: var(--white); }
     th { padding: .85rem 1rem; text-align: left; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; }
     td { padding: .85rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #F8FAFC; }
+
+    /* Configuración para Celulares / Pantallas chicas */
+    @media (max-width: 767px) {
+      table, thead, tbody, th, td, tr { 
+        display: block; 
+      }
+      thead tr { 
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+      tr {
+        border-bottom: 2px solid var(--border);
+        padding: 1rem 0;
+        background: var(--white);
+      }
+      td { 
+        border: none;
+        position: relative;
+        padding-left: 45% !important;
+        text-align: left !important;
+        margin-bottom: 0.5rem;
+        white-space: normal !important;
+      }
+      td::before { 
+        position: absolute;
+        left: 1rem;
+        width: 40%; 
+        padding-right: 10px; 
+        white-space: nowrap;
+        font-weight: 600;
+        color: var(--gray);
+        font-size: 0.85rem;
+      }
+      /* Mapeo dinámico de títulos en móvil */
+      td:nth-of-type(1)::before { content: "Código:"; }
+      td:nth-of-type(2)::before { content: "Cliente:"; }
+      td:nth-of-type(3)::before { content: "Cédula:"; }
+      td:nth-of-type(4)::before { content: "Celular:"; }
+      td:nth-of-type(5)::before { content: "Fecha:"; }
+      td:nth-of-type(6)::before { content: "Estado:"; }
+      td:nth-of-type(7)::before { content: "Acciones:"; }
+
+      .actions {
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px dashed var(--border);
+      }
+    }
 
     .badge {
       display: inline-flex; align-items: center; gap: .3rem;
@@ -257,9 +216,9 @@
 
     .code-cell { font-family: 'Playfair Display', serif; font-size: .9rem; letter-spacing: .08em; color: var(--navy); font-weight: 600; }
 
-    .actions { display: flex; gap: .4rem; }
+    .actions { display: flex; gap: .4rem; flex-wrap: wrap; }
     .action-btn {
-      padding: .3rem .65rem; border: none; border-radius: 4px;
+      padding: .35rem .65rem; border: none; border-radius: 4px;
       cursor: pointer; font-size: .75rem; font-weight: 600; transition: opacity .15s;
     }
     .action-btn:hover { opacity: .8; }
@@ -271,11 +230,12 @@
     .empty-state { text-align: center; padding: 3rem; color: var(--gray); }
     .empty-state svg { margin-bottom: .8rem; opacity: .4; }
 
-    /* MODAL */
+    /* MODAL RESPONSIVO */
     .modal-bg {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,.5); z-index: 1000;
       align-items: center; justify-content: center;
+      padding: 1rem;
     }
     .modal-bg.open { display: flex; }
     .modal {
@@ -305,7 +265,20 @@
     .modal-field textarea:focus,
     .modal-field select:focus { border-color: var(--gold); }
     .modal-field textarea { resize: vertical; min-height: 80px; }
-    .modal-actions { display: flex; gap: .75rem; justify-content: flex-end; padding-top: .5rem; }
+    
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 480px) {
+      .modal-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .modal-actions { display: flex; gap: .75rem; justify-content: flex-end; padding-top: .5rem; flex-wrap: wrap; }
+    .modal-actions button { flex: 1; }
+    @media (min-width: 480px) {
+      .modal-actions button { flex: none; }
+    }
     .btn-save {
       background: var(--navy); color: var(--white); border: none;
       border-radius: 6px; padding: .6rem 1.4rem; font-weight: 600; cursor: pointer; transition: background .2s;
@@ -325,17 +298,10 @@
       border-left: 4px solid var(--gold);
     }
     .toast.show { opacity: 1; }
-
-    @media(max-width:640px){
-      th:nth-child(4), td:nth-child(4),
-      th:nth-child(5), td:nth-child(5) { display: none; }
-      .search-box input { width: 160px; }
-    }
   </style>
 </head>
 <body>
 
-<!-- ── LOGIN ── -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">JM</div>
@@ -343,7 +309,7 @@
     <p>Estudio Jurídico Jorge Meza Espín</p>
     <div class="login-field">
       <label>Usuario</label>
-      <input type="email" id="login-email" placeholder="admin@jorgemeza.ec" />
+      <input type="text" id="login-email" placeholder="jorgemeza.ec" />
     </div>
     <div class="login-field">
       <label>Contraseña</label>
@@ -354,7 +320,6 @@
   </div>
 </div>
 
-<!-- ── ADMIN ── -->
 <div id="admin-screen">
   <div class="top-bar">
     <div class="top-bar-left">
@@ -369,7 +334,6 @@
   </div>
 
   <div class="main">
-    <!-- Stats -->
     <div class="stats">
       <div class="stat-card gold">
         <div class="stat-num" id="stat-total">–</div>
@@ -389,7 +353,6 @@
       </div>
     </div>
 
-    <!-- Toolbar -->
     <div class="toolbar">
       <div class="search-box">
         <input type="text" id="search-input" placeholder="🔍  Buscar nombre, cédula, código…" oninput="filtrar()" />
@@ -403,7 +366,6 @@
       <button class="btn-refresh" onclick="cargarConsultas()">↻ Actualizar</button>
     </div>
 
-    <!-- Table -->
     <div class="table-wrap">
       <table>
         <thead>
@@ -425,7 +387,6 @@
   </div>
 </div>
 
-<!-- MODAL EDITAR -->
 <div class="modal-bg" id="modal-bg" onclick="if(event.target===this)cerrarModal()">
   <div class="modal">
     <div class="modal-head">
@@ -434,7 +395,7 @@
     </div>
     <div class="modal-body">
       <input type="hidden" id="m-id" />
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="modal-grid">
         <div class="modal-field">
           <label>Nombre</label>
           <input type="text" id="m-nombre" />
@@ -466,7 +427,7 @@
       </div>
       <div class="modal-field">
         <label>Notas internas</label>
-        <textarea id="m-notas" rows="3" placeholder="Observaciones del abogado…"></textarea>
+        <textarea id="m-notes" rows="3" placeholder="Observaciones del abogado…"></textarea>
       </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
@@ -483,7 +444,7 @@
   const SUPABASE_URL = 'https://ctbnbikbwgujqglcobcl.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Ym5iaWtid2d1anFnbGNvYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTk3MzQsImV4cCI6MjA5Nzc3NTczNH0.MbaUNGXZ5HEihaQDPXjERxirOLncfe52kqoBrEJhBZw';
   const WA_NUMBER   = '593978973366';
-  // Credenciales de admin (puedes usar Supabase Auth en su lugar)
+  
   const ADMIN_USER = 'jorgemeza.ec';
   const ADMIN_PASS = 'admin123';
 
@@ -516,7 +477,6 @@
     document.getElementById('login-screen').style.display = 'flex';
   }
 
-  // Auto-login si ya hay sesión
   window.addEventListener('DOMContentLoaded', () => {
     const s = sessionStorage.getItem('jm_admin');
     if (s) {
@@ -556,26 +516,9 @@
   }
 
   function renderTabla() {
-    const q      = document.getElementById('search-input').value.toLowerCase();
+    const q     = document.getElementById('search-input').value.toLowerCase();
     const tbody  = document.getElementById('tabla-body');
-// Modifica la construcción del tr dentro de tu función renderTabla() actual:
-  let html = '';
-  ...
-  html += `
-    <tr>
-      <td data-label="Código"><strong>${r.codigo || '—'}</strong></td>
-      <td data-label="Cliente">${r.nombre}</td>
-      <td data-label="Cédula">${r.cedula}</td>
-      <td data-label="Celular">${r.celular}</td>
-      <td data-label="Motivo" style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${r.motivo}</td>
-      <td data-label="Estado"><span class="badge ${claseBadge}">${r.estado.toUpperCase()}</span></td>
-      <td data-label="Acciones" class="actions-cell">
-        <button class="btn btn-secondary btn-sm" onclick="abrirModal('${r.id}')" title="Editar / Ver Notas">✏️</button>
-        ${r.estado !== 'aprobada' ? `<button class="btn btn-success btn-sm" onclick="cambiarEstado('${r.id}', 'aprobada')" title="Aprobar">✅</button>` : ''}
-        ${r.estado !== 'rechazada' ? `<button class="btn btn-danger btn-sm" onclick="cambiarEstado('${r.id}', 'rechazada')" title="Rechazar">❌</button>` : ''}
-      </td>
-    </tr>
-  `;
+
     let filas = todasConsultas
       .filter(r => filtroActual === 'todos' || r.estado === filtroActual)
       .filter(r =>
@@ -597,18 +540,18 @@
     tbody.innerHTML = filas.map(r => {
       const fecha = r.fecha ? new Date(r.fecha).toLocaleDateString('es-EC', {day:'2-digit',month:'short',year:'numeric'}) : '—';
       return `<tr>
-        <td><span class="code-cell">${r.codigo}</span></td>
-        <td>${esc(r.nombre)}</td>
-        <td>${esc(r.cedula)}</td>
-        <td>${esc(r.celular)}</td>
-        <td>${fecha}</td>
-        <td><span class="badge ${r.estado}">${estadoLabel(r.estado)}</span></td>
-        <td>
+        <td data-label="Código"><span class="code-cell">${r.codigo}</span></td>
+        <td data-label="Cliente">${esc(r.nombre)}</td>
+        <td data-label="Cédula">${esc(r.cedula)}</td>
+        <td data-label="Celular">${esc(r.celular)}</td>
+        <td data-label="Fecha">${fecha}</td>
+        <td data-label="Estado"><span class="badge ${r.estado}">${estadoLabel(r.estado)}</span></td>
+        <td data-label="Acciones">
           <div class="actions">
             <button class="action-btn btn-view" onclick='abrirModal(${JSON.stringify(r)})'>✏️ Ver/Editar</button>
             ${r.estado!=='aprobada' ? `<button class="action-btn btn-approve" onclick="cambiarEstado('${r.id}','aprobada')">✅</button>` : ''}
             ${r.estado!=='rechazada' ? `<button class="action-btn btn-reject" onclick="cambiarEstado('${r.id}','rechazada')">❌</button>` : ''}
-            <button class="action-btn btn-wa" onclick="enviarWA(${JSON.stringify(r)})">💬</button>
+            <button class="action-btn btn-wa" onclick='enviarWA(${JSON.stringify(r)})'>💬</button>
           </div>
         </td>
       </tr>`;
@@ -629,12 +572,11 @@
 
   function filtrar() { renderTabla(); }
 
-// ── CAMBIAR ESTADO RÁPIDO (Con envío automático a WhatsApp) ────────────────
+  // ── CAMBIAR ESTADO RÁPIDO ────────────────
   async function cambiarEstado(id, nuevoEstado) {
     const { error } = await sb.from('consultas').update({ estado: nuevoEstado }).eq('id', id);
     if (error) { toast('❌ Error: ' + error.message); return; }
     
-    // Obtener los datos del registro modificado antes de mapear
     const registroModificado = todasConsultas.find(r => r.id === id);
     
     todasConsultas = todasConsultas.map(r => r.id === id ? {...r, estado: nuevoEstado} : r);
@@ -642,10 +584,8 @@
     renderTabla();
     toast(nuevoEstado === 'aprobada' ? '✅ Consulta aprobada' : '❌ Consulta rechazada');
 
-    // Enviar el mensaje automático al cliente si el registro existe
     if (registroModificado) {
       const registroActualizado = {...registroModificado, estado: nuevoEstado};
-      // Pequeño retraso para que el administrador note el cambio visual en el panel antes de abrir la pestaña
       setTimeout(() => {
         enviarWA(registroActualizado);
       }, 500);
@@ -661,7 +601,7 @@
     document.getElementById('m-codigo').value = r.codigo;
     document.getElementById('m-motivo').value = r.motivo;
     document.getElementById('m-estado').value = r.estado;
-    document.getElementById('m-notas').value  = r.notas || '';
+    document.getElementById('m-notes').value  = r.notas || '';
     document.getElementById('modal-title').textContent = `Consulta — ${r.codigo}`;
     document.getElementById('modal-bg').classList.add('open');
   }
@@ -670,7 +610,7 @@
     document.getElementById('modal-bg').classList.remove('open');
   }
 
- // ── GUARDAR CAMBIOS DESDE MODAL (Con envío automático a WhatsApp) ──────────
+  // ── GUARDAR CAMBIOS DESDE MODAL ──────────
   async function guardarCambios() {
     const id     = document.getElementById('m-id').value;
     const update = {
@@ -679,7 +619,7 @@
       celular: document.getElementById('m-celular').value.trim(),
       motivo:  document.getElementById('m-motivo').value.trim(),
       estado:  document.getElementById('m-estado').value,
-      notas:   document.getElementById('m-notas').value.trim(),
+      notas:   document.getElementById('m-notes').value.trim(),
     };
 
     const { error } = await sb.from('consultas').update(update).eq('id', id);
@@ -691,14 +631,13 @@
     cerrarModal();
     toast('💾 Cambios guardados correctamente');
 
-    // Lanzar el mensaje de WhatsApp estructurado con los nuevos cambios e ID
     const registroCompleto = { id, ...update, codigo: document.getElementById('m-codigo').value };
     setTimeout(() => {
       enviarWA(registroCompleto);
     }, 500);
   }
 
- // ── WHATSAPP FORMATO SEGURO ─────────────────────────────────────────────────
+  // ── WHATSAPP FORMATO SEGURO ─────────────────────────────────────────────────
   function enviarWA(r) {
     const estadoTexto = { pendiente:'PENDIENTE ⏳', aprobada:'APROBADA ✅', rechazada:'RECHAZADA ❌' }[r.estado];
     const msg = encodeURIComponent(
@@ -711,16 +650,14 @@
       `_Atte. Estudio Jurídico Jorge Meza Espín_`
     );
     
-    // Formatear el número limpiando caracteres no numéricos
     let numeroLimpio = r.celular.replace(/\D/g, '');
-    
-    // Si el número es de Ecuador, empieza con 0 y tiene 10 dígitos, añadir el código de país
     if (numeroLimpio.length === 10 && numeroLimpio.startsWith('0')) {
       numeroLimpio = '593' + numeroLimpio.substring(1);
     }
     
     window.open(`https://wa.me/${numeroLimpio}?text=${msg}`, '_blank');
   }
+
   // ── TOAST ────────────────────────────────────────────────────
   function toast(msg) {
     const el = document.getElementById('toast');
