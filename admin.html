@@ -7,6 +7,117 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    /* ── OPTIMIZACIÓN RESPONSIVE GENERAL ── */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem; /* Reducido para pantallas pequeñas */
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Se adapta al ancho disponible */
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .header-panel {
+      display: flex;
+      flex-direction: column; /* Por defecto en fila vertical para móviles */
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    /* En pantallas medianas/grandes, el encabezado se alinea horizontalmente */
+    @media (min-width: 768px) {
+      .container { padding: 2rem; }
+      .header-panel {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+
+    /* ── TABLA ADAPTABLE (MÁGICA PARA MÓVILES) ── */
+    .table-wrapper {
+      width: 100%;
+      background: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    /* Reglas para pantallas de celular (menos de 768px) */
+    @media (max-width: 767px) {
+      table, thead, tbody, th, td, tr { 
+        display: block; /* Transforma la estructura en bloques verticales */
+      }
+      
+      /* Esconde los encabezados originales de la tabla */
+      thead tr { 
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+      
+      tr {
+        border-bottom: 2px solid var(--border);
+        padding: 1rem 0;
+        background: var(--white);
+      }
+      
+      td { 
+        border: none;
+        position: relative;
+        padding-left: 45% !important; /* Deja espacio para el título a la izquierda */
+        text-align: left !important;
+        margin-bottom: 0.5rem;
+        white-space: normal !important; /* Evita que el texto largo se corte */
+      }
+      
+      /* Inyecta de forma dinámica títulos simulados antes de cada dato */
+      td::before { 
+        position: absolute;
+        left: 1rem;
+        width: 40%; 
+        padding-right: 10px; 
+        white-space: nowrap;
+        font-weight: 600;
+        color: var(--gray);
+        font-size: 0.85rem;
+      }
+      
+      /* Mapeo de columnas mediante el atributo data-label */
+      td:nth-of-type(1)::before { content: "Código:"; }
+      td:nth-of-type(2)::before { content: "Cliente:"; }
+      td:nth-of-type(3)::before { content: "Cédula:"; }
+      td:nth-of-type(4)::before { content: "Celular:"; }
+      td:nth-of-type(5)::before { content: "Motivo:"; }
+      td:nth-of-type(6)::before { content: "Estado:"; }
+      td:nth-of-type(7)::before { content: "Acciones:"; }
+
+      /* Ajuste especial para los botones de acción en móviles */
+      .actions-cell {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px dashed var(--border);
+      }
+    }
+
+    /* ── MODAL RESPONSIVE ── */
+    .modal-content {
+      background: var(--white);
+      padding: 1.5rem;
+      border-radius: 8px;
+      width: 95%; /* Ocupa casi todo el ancho en móviles */
+      max-width: 600px; /* No se desborda en PC */
+      max-height: 90vh;
+      overflow-y: auto; /* Permite scroll si el formulario es muy largo */
+    }
     :root {
       --navy:    #1B2A4A;
       --navy2:   #243860;
@@ -447,7 +558,24 @@
   function renderTabla() {
     const q      = document.getElementById('search-input').value.toLowerCase();
     const tbody  = document.getElementById('tabla-body');
-
+// Modifica la construcción del tr dentro de tu función renderTabla() actual:
+  let html = '';
+  ...
+  html += `
+    <tr>
+      <td data-label="Código"><strong>${r.codigo || '—'}</strong></td>
+      <td data-label="Cliente">${r.nombre}</td>
+      <td data-label="Cédula">${r.cedula}</td>
+      <td data-label="Celular">${r.celular}</td>
+      <td data-label="Motivo" style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${r.motivo}</td>
+      <td data-label="Estado"><span class="badge ${claseBadge}">${r.estado.toUpperCase()}</span></td>
+      <td data-label="Acciones" class="actions-cell">
+        <button class="btn btn-secondary btn-sm" onclick="abrirModal('${r.id}')" title="Editar / Ver Notas">✏️</button>
+        ${r.estado !== 'aprobada' ? `<button class="btn btn-success btn-sm" onclick="cambiarEstado('${r.id}', 'aprobada')" title="Aprobar">✅</button>` : ''}
+        ${r.estado !== 'rechazada' ? `<button class="btn btn-danger btn-sm" onclick="cambiarEstado('${r.id}', 'rechazada')" title="Rechazar">❌</button>` : ''}
+      </td>
+    </tr>
+  `;
     let filas = todasConsultas
       .filter(r => filtroActual === 'todos' || r.estado === filtroActual)
       .filter(r =>
