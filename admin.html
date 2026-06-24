@@ -6,6 +6,7 @@
   <title>Panel Administrativo — Jorge Meza Espín</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
   <style>
     :root {
       --navy:    #1B2A4A;
@@ -109,6 +110,11 @@
     .stat-num { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--navy); }
     .stat-label { font-size: .75rem; color: var(--gray); margin-top: .2rem; }
 
+    /* Secciones de Navegación del Panel */
+    .view-selector { display: flex; gap: .5rem; margin-bottom: 1rem; }
+    .btn-view-tab { padding: .6rem 1.2rem; background: #E2E8F0; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: .85rem; color: var(--navy); }
+    .btn-view-tab.active { background: var(--navy); color: var(--white); }
+
     /* Barra de herramientas / Toolbar */
     .toolbar {
       display: flex; align-items: center; justify-content: space-between;
@@ -193,10 +199,24 @@
     .btn-approve  { background: var(--approvedbg); color: var(--approved); }
     .btn-reject   { background: var(--rejectedbg); color: var(--rejected); }
     .btn-wa       { background: #D1FAE5; color: #065F46; }
-    .btn-delete   { background: #FEE2E2; color: #B91C1C; } /* Estilo para el botón eliminar */
+    .btn-delete   { background: #FEE2E2; color: #B91C1C; }
 
     .empty-state { text-align: center; padding: 3rem; color: var(--gray); }
     .empty-state svg { margin-bottom: .8rem; opacity: .4; }
+
+    /* CONTENEDOR CALENDARIO */
+    #calendar-wrap {
+      background: var(--white);
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 6px rgba(0,0,0,.06);
+      display: none;
+    }
+    /* Customizaciones para FullCalendar */
+    .fc .fc-toolbar-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--navy); }
+    .fc .fc-button-primary { background-color: var(--navy); border-color: var(--navy); }
+    .fc .fc-button-primary:hover { background-color: var(--navy2); border-color: var(--navy2); }
+    .fc .fc-button-primary:disabled { background-color: var(--gray); border-color: var(--gray); }
 
     /* MODAL RESPONSIVO */
     .modal-bg {
@@ -259,7 +279,6 @@
 </head>
 <body>
 
-<!-- ── LOGIN ── -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">JM</div>
@@ -278,7 +297,6 @@
   </div>
 </div>
 
-<!-- ── ADMIN ── -->
 <div id="admin-screen">
   <div class="top-bar">
     <div class="top-bar-left">
@@ -293,7 +311,6 @@
   </div>
 
   <div class="main">
-    <!-- Stats -->
     <div class="stats">
       <div class="stat-card gold">
         <div class="stat-num" id="stat-total">–</div>
@@ -313,43 +330,52 @@
       </div>
     </div>
 
-    <!-- Toolbar -->
-    <div class="toolbar">
-      <div class="search-box">
-        <input type="text" id="search-input" placeholder="🔍  Buscar nombre, cédula, código…" oninput="filtrar()" />
-      </div>
-      <div class="filter-tabs">
-        <div class="tab active" onclick="setTab('todos',this)">Todas</div>
-        <div class="tab" onclick="setTab('pendiente',this)">Pendientes</div>
-        <div class="tab" onclick="setTab('aprobada',this)">Aprobadas</div>
-        <div class="tab" onclick="setTab('rechazada',this)">Rechazadas</div>
-      </div>
-      <button class="btn-refresh" onclick="cargarConsultas()">↻ Actualizar</button>
+    <div class="view-selector">
+      <button class="btn-view-tab active" id="tab-lista" onclick="cambiarVistaPrincipal('lista')">📋 Lista de Consultas</button>
+      <button class="btn-view-tab" id="tab-calendario" onclick="cambiarVistaPrincipal('calendario')">📅 Calendario de Citas</button>
     </div>
 
-    <!-- Table -->
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Cédula</th>
-            <th>Celular</th>
-            <th>Fecha</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-body">
-          <tr><td colspan="7" class="empty-state">Cargando…</td></tr>
-        </tbody>
-      </table>
+    <div id="lista-wrap">
+      <div class="toolbar">
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="🔍  Buscar nombre, cédula, código…" oninput="filtrar()" />
+        </div>
+        <div class="filter-tabs">
+          <div class="tab active" onclick="setTab('todos',this)">Todas</div>
+          <div class="tab" onclick="setTab('pendiente',this)">Pendientes</div>
+          <div class="tab" onclick="setTab('aprobada',this)">Aprobadas</div>
+          <div class="tab" onclick="setTab('rechazada',this)">Rechazadas</div>
+        </div>
+        <button class="btn-refresh" onclick="cargarConsultas()">↻ Actualizar</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Cédula</th>
+              <th>Celular</th>
+              <th>Fecha Solicitud</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body">
+            <tr><td colspan="7" class="empty-state">Cargando…</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
+
+    <div id="calendar-wrap">
+      <div id="calendar"></div>
+    </div>
+
   </div>
 </div>
 
-<!-- MODAL EDITAR -->
 <div class="modal-bg" id="modal-bg" onclick="if(event.target===this)cerrarModal()">
   <div class="modal">
     <div class="modal-head">
@@ -382,15 +408,41 @@
       </div>
       <div class="modal-field">
         <label>Estado</label>
-        <select id="m-estado">
+        <select id="m-estado" onchange="toggleSeccionCita(this.value)">
           <option value="pendiente">Pendiente</option>
           <option value="aprobada">Aprobada</option>
           <option value="rechazada">Rechazada</option>
         </select>
       </div>
+
+      <div id="seccion-cita" style="display:none; background: #FFFBEB; border: 1px solid #FEF3C7; padding: 1rem; border-radius: 6px; margin-bottom: 1.1rem;">
+        <p style="font-size: .8rem; font-weight: 600; color: #92400E; margin-bottom: .5rem;">📅 ASIGNAR HORARIO DE CITA (Lunes a Viernes 8:00 a 16:00)</p>
+        <div class="modal-grid">
+          <div class="modal-field">
+            <label>Fecha de la Cita</label>
+            <input type="date" id="m-fecha-cita" onchange="validarDiaSemana(this)" />
+          </div>
+          <div class="modal-field">
+            <label>Hora de la Cita</label>
+            <select id="m-hora-cita">
+              <option value="">-- Seleccionar Hora --</option>
+              <option value="08:00">08:00 AM</option>
+              <option value="09:00">09:00 AM</option>
+              <option value="10:00">10:00 AM</option>
+              <option value="11:00">11:00 AM</option>
+              <option value="12:00">12:00 PM</option>
+              <option value="13:00">01:00 PM</option>
+              <option value="14:00">02:00 PM</option>
+              <option value="15:00">03:00 PM</option>
+              <option value="16:00">04:00 PM</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <div class="modal-field">
-        <label>Notas internas</label>
-        <textarea id="m-notes" rows="3" placeholder="Observaciones del abogado…"></textarea>
+        <label>Notas internas / Detalles de la Cita</label>
+        <textarea id="m-notes" rows="3" placeholder="Observaciones del abogado o dirección de la cita…"></textarea>
       </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
@@ -414,6 +466,7 @@
 
   let todasConsultas = [];
   let filtroActual   = 'todos';
+  let calendar       = null;
 
   // ── LOGIN ───────────────────────────────────────────────────
   function doLogin() {
@@ -449,6 +502,72 @@
     }
   });
 
+  // ── CONTROL DE VISTAS PRINCIPALES ───────────────────────────
+  function cambiarVistaPrincipal(vista) {
+    const listWrap = document.getElementById('lista-wrap');
+    const calWrap  = document.getElementById('calendar-wrap');
+    const tabList  = document.getElementById('tab-lista');
+    const tabCal   = document.getElementById('tab-calendario');
+
+    if(vista === 'lista') {
+      listWrap.style.display = 'block';
+      calWrap.style.display = 'none';
+      tabList.classList.add('active');
+      tabCal.classList.remove('active');
+    } else {
+      listWrap.style.display = 'none';
+      calWrap.style.display = 'block';
+      tabList.classList.remove('active');
+      tabCal.classList.add('active');
+      initCalendario();
+    }
+  }
+
+  // ── INITIALIZE FULLCALENDAR ────────────────────────────────
+  function initCalendario() {
+    const calendarEl = document.getElementById('calendar');
+    
+    // Mapear consultas aprobadas que tengan fecha de cita agendada
+    const eventos = todasConsultas
+      .filter(r => r.estado === 'aprobada' && r.fecha_cita)
+      .map(r => {
+        return {
+          id: r.id,
+          title: `Cita: ${r.nombre} (${r.codigo})`,
+          start: r.fecha_cita, // Formato esperado ISO: 'YYYY-MM-DDTHH:mm:ss' o similar
+          backgroundColor: '#065F46',
+          borderColor: '#065F46',
+          extendedProps: r
+        };
+      });
+
+    if (calendar) {
+      calendar.destroy();
+    }
+
+    calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'es',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
+      buttonText: {
+        today: 'Hoy',
+        month: 'Mes',
+        week: 'Semana',
+        day: 'Día'
+      },
+      events: eventos,
+      eventClick: function(info) {
+        abrirModal(info.event.extendedProps);
+      }
+    });
+
+    calendar.render();
+  }
+
   // ── CARGAR ──────────────────────────────────────────────────
   async function cargarConsultas() {
     const tbody = document.getElementById('tabla-body');
@@ -467,6 +586,9 @@
     todasConsultas = data || [];
     actualizarStats();
     renderTabla();
+    if(document.getElementById('calendar-wrap').style.display === 'block') {
+      initCalendario();
+    }
   }
 
   function actualizarStats() {
@@ -511,10 +633,9 @@
         <td data-label="Acciones">
           <div class="actions">
             <button class="action-btn btn-view" onclick='abrirModal(${JSON.stringify(r)})'>✏️ Ver/Editar</button>
-            ${r.estado!=='aprobada' ? `<button class="action-btn btn-approve" onclick="cambiarEstado('${r.id}','aprobada')">✅</button>` : ''}
+            ${r.estado!=='aprobada' ? `<button class="action-btn btn-approve" onclick="abrirModalConEstadoAprobado(${JSON.stringify(r)})">✅</button>` : ''}
             ${r.estado!=='rechazada' ? `<button class="action-btn btn-reject" onclick="cambiarEstado('${r.id}','rechazada')">❌</button>` : ''}
             <button class="action-btn btn-wa" onclick='enviarWA(${JSON.stringify(r)})'>💬</button>
-            <!-- El botón de eliminar solo aparece si el estado es estrictamente 'rechazada' -->
             ${r.estado === 'rechazada' ? `<button class="action-btn btn-delete" onclick="eliminarConsulta('${r.id}', '${r.codigo}')">🗑️ Eliminar</button>` : ''}
           </div>
         </td>
@@ -536,7 +657,13 @@
 
   function filtrar() { renderTabla(); }
 
-  // ── CAMBIAR ESTADO RÁPIDO ────────────────
+  // ── CAMBIO DE ESTADO DIRECTO DESDE LISTA ──
+  function abrirModalConEstadoAprobado(r) {
+    abrirModal(r);
+    document.getElementById('m-estado').value = 'aprobada';
+    toggleSeccionCita('aprobada');
+  }
+
   async function cambiarEstado(id, nuevoEstado) {
     const { error } = await sb.from('consultas').update({ estado: nuevoEstado }).eq('id', id);
     if (error) { toast('❌ Error: ' + error.message); return; }
@@ -556,25 +683,38 @@
     }
   }
 
+  // ── VALIDACIÓN DIAS LABORALES ──
+  function validarDiaSemana(input) {
+    if(!input.value) return;
+    const date = new Date(input.value + 'T00:00:00');
+    const day = date.getDay(); // 0 = Domingo, 6 = Sábado
+    if (day === 0 || day === 6) {
+      alert('Por favor seleccione un día laborable de Lunes a Viernes.');
+      input.value = '';
+    }
+  }
+
+  function toggleSeccionCita(estado) {
+    const seccion = document.getElementById('seccion-cita');
+    if(estado === 'aprobada') {
+      seccion.style.display = 'block';
+    } else {
+      seccion.style.display = 'none';
+    }
+  }
+
   // ── ELIMINAR SOLICITUD ───────────────────
   async function eliminarConsulta(id, codigo) {
     const confirmar = confirm(`¿Está seguro de que desea eliminar permanentemente la solicitud ${codigo}? Esta acción no se puede deshacer.`);
     if (!confirmar) return;
 
-    const { error } = await sb
-      .from('consultas')
-      .delete()
-      .eq('id', id);
+    const { error } = await sb.from('consultas').delete().eq('id', id);
+    if (error) { toast('❌ Error al eliminar: ' + error.message); return; }
 
-    if (error) {
-      toast('❌ Error al eliminar: ' + error.message);
-      return;
-    }
-
-    // Filtrar localmente el elemento borrado para no volver a consultar toda la BD
     todasConsultas = todasConsultas.filter(r => r.id !== id);
     actualizarStats();
     renderTabla();
+    if(calendar) initCalendario();
     toast(`🗑️ Solicitud ${codigo} eliminada correctamente`);
   }
 
@@ -589,6 +729,22 @@
     document.getElementById('m-estado').value = r.estado;
     document.getElementById('m-notes').value  = r.notas || '';
     document.getElementById('modal-title').textContent = `Consulta — ${r.codigo}`;
+
+    // Desglosar fecha_cita guardada en la base de datos (Ej: "2026-04-15T09:00:00")
+    if (r.fecha_cita) {
+      const parts = r.fecha_cita.split('T');
+      document.getElementById('m-fecha-cita').value = parts[0];
+      if(parts[1]) {
+        document.getElementById('m-hora-cita').value = parts[1].substring(0, 5);
+      } else {
+        document.getElementById('m-hora-cita').value = "";
+      }
+    } else {
+      document.getElementById('m-fecha-cita').value = "";
+      document.getElementById('m-hora-cita').value = "";
+    }
+
+    toggleSeccionCita(r.estado);
     document.getElementById('modal-bg').classList.add('open');
   }
 
@@ -598,14 +754,29 @@
 
   // ── GUARDAR CAMBIOS DESDE MODAL ──────────
   async function guardarCambios() {
-    const id     = document.getElementById('m-id').value;
+    const id           = document.getElementById('m-id').value;
+    const nuevoEstado  = document.getElementById('m-estado').value;
+    const fechaVal     = document.getElementById('m-fecha-cita').value;
+    const horaVal      = document.getElementById('m-hora-cita').value;
+
+    let fechaCitaCompleta = null;
+
+    if (nuevoEstado === 'aprobada') {
+      if (!fechaVal || !horaVal) {
+        alert('Para aprobar la consulta debe asignar una Fecha y Hora válidas para la cita.');
+        return;
+      }
+      fechaCitaCompleta = `${fechaVal}T${horaVal}:00`;
+    }
+
     const update = {
-      nombre:  document.getElementById('m-nombre').value.trim(),
-      cedula:  document.getElementById('m-cedula').value.trim(),
-      celular: document.getElementById('m-celular').value.trim(),
-      motivo:  document.getElementById('m-motivo').value.trim(),
-      estado:  document.getElementById('m-estado').value,
-      notas:   document.getElementById('m-notes').value.trim(),
+      nombre:     document.getElementById('m-nombre').value.trim(),
+      cedula:     document.getElementById('m-cedula').value.trim(),
+      celular:    document.getElementById('m-celular').value.trim(),
+      motivo:     document.getElementById('m-motivo').value.trim(),
+      estado:     nuevoEstado,
+      notas:      document.getElementById('m-notes').value.trim(),
+      fecha_cita: fechaCitaCompleta
     };
 
     const { error } = await sb.from('consultas').update(update).eq('id', id);
@@ -614,6 +785,7 @@
     todasConsultas = todasConsultas.map(r => r.id === id ? {...r, ...update} : r);
     actualizarStats();
     renderTabla();
+    if(calendar) initCalendario();
     cerrarModal();
     toast('💾 Cambios guardados correctamente');
 
@@ -626,13 +798,22 @@
   // ── WHATSAPP FORMATO SEGURO ─────────────────────────────────────────────────
   function enviarWA(r) {
     const estadoTexto = { pendiente:'PENDIENTE ⏳', aprobada:'APROBADA ✅', rechazada:'RECHAZADA ❌' }[r.estado];
+    
+    let infoCita = '';
+    if(r.estado === 'aprobada' && r.fecha_cita) {
+      const parts = r.fecha_cita.split('T');
+      const fechaLegible = new Date(parts[0]+'T00:00:00').toLocaleDateString('es-EC', {day:'2-digit',month:'long',year:'numeric'});
+      infoCita = `📅 *Detalles de su cita agendada:*\n*Fecha:* ${fechaLegible}\n*Hora:* ${parts[1].substring(0,5)} hs\n\n`;
+    }
+
     const msg = encodeURIComponent(
       `*ESTUDIO JURÍDICO JORGE MEZA ESPÍN*\n` +
       `Estimado/a ${r.nombre},\n\n` +
       `Su solicitud con código *${r.codigo}* ha sido revisada.\n` +
       `Estado actual: *${estadoTexto}*\n\n` +
+      infoCita +
       `${r.notas ? '📋 Nota del Abogado:\n' + r.notas + '\n\n' : ''}` +
-      `Por favor contáctenos al responder este mensaje si tiene alguna consulta adicional.\n\n` +
+      `Por favor contáctenos al responder este mensaje si tiene alguna consulta adicional o requiere reprogramar.\n\n` +
       `_Atte. Estudio Jurídico Jorge Meza Espín_`
     );
     
