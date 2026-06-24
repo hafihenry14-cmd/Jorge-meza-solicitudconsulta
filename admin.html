@@ -799,6 +799,7 @@
           <div class="actions">
             <button class="action-btn btn-view" onclick='abrirModal(${JSON.stringify(r)})'>✏️ Editar</button>
             <button class="action-btn btn-wa" onclick='enviarWA(${JSON.stringify(r)})'>💬</button>
+            <button class="action-btn btn-delete" onclick='eliminarConsulta("${r.id}", "${esc(r.nombre)}")'>🗑️</button>
           </div>
         </td>
       </tr>`;
@@ -869,9 +870,24 @@
     const { error } = await sb.from('consultas').update(update).eq('id', id);
     if (!error) {
       cerrarModal();
-      toast('💾 Cambios guardados e indexados correctamente');
+      toast('💾 Cambios guardados — abriendo WhatsApp…');
       cargarDatosTotales();
+      // Construir el objeto actualizado para enviar por WhatsApp
+      const actualizado = {
+        ...todasConsultas.find(r => r.id == id),
+        ...update,
+        fecha_cita: fechaCitaCompleta
+      };
+      enviarWA(actualizado);
     }
+  }
+
+  async function eliminarConsulta(id, nombre) {
+    if (!confirm(`¿Eliminar permanentemente la solicitud de "${nombre}"?\nEsta acción no se puede deshacer.`)) return;
+    const { error } = await sb.from('consultas').delete().eq('id', id);
+    if (error) { alert(error.message); return; }
+    toast('🗑️ Solicitud eliminada permanentemente');
+    cargarDatosTotales();
   }
 
   function enviarWA(r) {
