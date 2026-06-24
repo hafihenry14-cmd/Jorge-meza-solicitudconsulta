@@ -694,10 +694,17 @@
     }
   }
 
-  function toggleSeccionCita(estado) {
+ function toggleSeccionCita(estado) {
     const seccion = document.getElementById('seccion-cita');
     if(estado === 'aprobada') {
       seccion.style.display = 'block';
+      
+      // Bloquear días pasados en el input tipo date
+      const hoy = new Date();
+      const yyyy = hoy.getFullYear();
+      const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+      const dd = String(hoy.getDate()).padStart(2, '0');
+      document.getElementById('m-fecha-cita').min = `${yyyy}-${mm}-${dd}`;
     } else {
       seccion.style.display = 'none';
     }
