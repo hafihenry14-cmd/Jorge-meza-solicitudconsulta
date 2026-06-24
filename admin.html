@@ -72,7 +72,7 @@
     .btn-login:hover { background: var(--navy2); }
     .login-err { font-size: .8rem; color: #B91C1C; margin-top: .8rem; display: none; }
 
-    /* ── MAIN LAYOUT RESPONSIVO ── */
+    /* ── MAIN LAYOUT ── */
     #admin-screen { display: none; }
 
     .top-bar {
@@ -92,11 +92,9 @@
     .btn-logout:hover { border-color: var(--gold); color: var(--gold); }
 
     .main { max-width: 1100px; margin: 0 auto; padding: 1rem; }
-    @media (min-width: 768px) {
-      .main { padding: 1.5rem; }
-    }
+    @media (min-width: 768px) { .main { padding: 1.5rem; } }
 
-    /* Grilla de Estadísticas Adaptable */
+    /* Stats */
     .stats { 
       display: grid; 
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
@@ -110,12 +108,16 @@
     .stat-num { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--navy); }
     .stat-label { font-size: .75rem; color: var(--gray); margin-top: .2rem; }
 
-    /* Secciones de Navegación del Panel */
-    .view-selector { display: flex; gap: .5rem; margin-bottom: 1rem; }
+    /* Nav Tabs */
+    .view-selector { display: flex; gap: .5rem; margin-bottom: 1rem; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+    .tab-buttons { display: flex; gap: .5rem; }
     .btn-view-tab { padding: .6rem 1.2rem; background: #E2E8F0; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: .85rem; color: var(--navy); }
     .btn-view-tab.active { background: var(--navy); color: var(--white); }
+    
+    .btn-add-diligencia { padding: .6rem 1.2rem; background: var(--gold); border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: .85rem; color: var(--navy); transition: background .2s; }
+    .btn-add-diligencia:hover { background: #b2933f; }
 
-    /* Barra de herramientas / Toolbar */
+    /* Toolbar */
     .toolbar {
       display: flex; align-items: center; justify-content: space-between;
       flex-wrap: wrap; gap: 1rem;
@@ -125,13 +127,9 @@
     .search-box { width: 100%; }
     .search-box input {
       border: 1.5px solid #D1D5DB; border-radius: 6px;
-      padding: .55rem .9rem; font-size: .88rem;
-      outline: none; transition: border-color .2s; width: 100%;
+      padding: .55rem .9rem; font-size: .88rem; outline: none; transition: border-color .2s; width: 100%;
     }
-    @media (min-width: 768px) {
-      .search-box { width: auto; }
-      .search-box input { width: 240px; }
-    }
+    @media (min-width: 768px) { .search-box { width: auto; } .search-box input { width: 240px; } }
     .search-box input:focus { border-color: var(--gold); }
     
     .filter-tabs { display: flex; gap: .4rem; flex-wrap: wrap; }
@@ -141,33 +139,23 @@
       transition: all .15s; color: var(--gray);
     }
     .tab.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
-    .tab:hover:not(.active) { border-color: var(--navy); color: var(--navy); }
     
-    .btn-refresh {
-      background: var(--cream); border: 1.5px solid var(--border);
-      border-radius: 6px; padding: .45rem .8rem; cursor: pointer; font-size: .85rem;
-      transition: background .15s; width: 100%; text-align: center;
-    }
-    @media (min-width: 640px) {
-      .btn-refresh { width: auto; }
-    }
-    .btn-refresh:hover { background: #E5E7EB; }
+    .btn-refresh { background: var(--cream); border: 1.5px solid var(--border); border-radius: 6px; padding: .45rem .8rem; cursor: pointer; font-size: .85rem; }
 
-    /* ── TABLA RESPONSIVA ── */
+    /* Tabla */
     .table-wrap { background: var(--white); border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.06); overflow: hidden; width: 100%; }
     table { width: 100%; border-collapse: collapse; font-size: .85rem; }
     thead { background: var(--navy); color: var(--white); }
     th { padding: .85rem 1rem; text-align: left; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; }
     td { padding: .85rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    tr:last-child td { border-bottom: none; }
     tr:hover td { background: #F8FAFC; }
 
     @media (max-width: 767px) {
       table, thead, tbody, th, td, tr { display: block; }
       thead tr { position: absolute; top: -9999px; left: -9999px; }
       tr { border-bottom: 2px solid var(--border); padding: 1rem 0; background: var(--white); }
-      td { border: none; position: relative; padding-left: 45% !important; text-align: left !important; margin-bottom: 0.5rem; white-space: normal !important; }
-      td::before { position: absolute; left: 1rem; width: 40%; padding-right: 10px; white-space: nowrap; font-weight: 600; color: var(--gray); font-size: 0.85rem; }
+      td { border: none; position: relative; padding-left: 45% !important; text-align: left !important; margin-bottom: 0.5rem; }
+      td::before { position: absolute; left: 1rem; width: 40%; font-weight: 600; color: var(--gray); font-size: 0.85rem; }
       td:nth-of-type(1)::before { content: "Código:"; }
       td:nth-of-type(2)::before { content: "Cliente:"; }
       td:nth-of-type(3)::before { content: "Cédula:"; }
@@ -175,26 +163,16 @@
       td:nth-of-type(5)::before { content: "Fecha:"; }
       td:nth-of-type(6)::before { content: "Estado:"; }
       td:nth-of-type(7)::before { content: "Acciones:"; }
-      .actions { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed var(--border); }
     }
 
-    .badge {
-      display: inline-flex; align-items: center; gap: .3rem;
-      font-size: .72rem; font-weight: 600; padding: .25rem .65rem;
-      border-radius: 20px; letter-spacing: .04em; text-transform: uppercase;
-    }
+    .badge { display: inline-flex; align-items: center; gap: .3rem; font-size: .72rem; font-weight: 600; padding: .25rem .65rem; border-radius: 20px; text-transform: uppercase; }
     .badge.pendiente  { background: var(--pendingbg);  color: var(--pending); }
     .badge.aprobada   { background: var(--approvedbg); color: var(--approved); }
     .badge.rechazada  { background: var(--rejectedbg); color: var(--rejected); }
 
-    .code-cell { font-family: 'Playfair Display', serif; font-size: .9rem; letter-spacing: .08em; color: var(--navy); font-weight: 600; }
-
+    .code-cell { font-family: 'Playfair Display', serif; font-size: .9rem; color: var(--navy); font-weight: 600; }
     .actions { display: flex; gap: .4rem; flex-wrap: wrap; }
-    .action-btn {
-      padding: .35rem .65rem; border: none; border-radius: 4px;
-      cursor: pointer; font-size: .75rem; font-weight: 600; transition: opacity .15s;
-    }
-    .action-btn:hover { opacity: .8; }
+    .action-btn { padding: .35rem .65rem; border: none; border-radius: 4px; cursor: pointer; font-size: .75rem; font-weight: 600; }
     .btn-view     { background: #DBEAFE; color: #1E40AF; }
     .btn-approve  { background: var(--approvedbg); color: var(--approved); }
     .btn-reject   { background: var(--rejectedbg); color: var(--rejected); }
@@ -202,78 +180,38 @@
     .btn-delete   { background: #FEE2E2; color: #B91C1C; }
 
     .empty-state { text-align: center; padding: 3rem; color: var(--gray); }
-    .empty-state svg { margin-bottom: .8rem; opacity: .4; }
 
-    /* CONTENEDOR CALENDARIO */
-    #calendar-wrap {
-      background: var(--white);
-      padding: 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 1px 6px rgba(0,0,0,.06);
-      display: none;
-    }
-    /* Customizaciones para FullCalendar */
+    /* Calendario */
+    #calendar-wrap { background: var(--white); padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.06); display: none; }
     .fc .fc-toolbar-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--navy); }
     .fc .fc-button-primary { background-color: var(--navy); border-color: var(--navy); }
     .fc .fc-button-primary:hover { background-color: var(--navy2); border-color: var(--navy2); }
-    .fc .fc-button-primary:disabled { background-color: var(--gray); border-color: var(--gray); }
 
-    /* MODAL RESPONSIVO */
-    .modal-bg {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.5); z-index: 1000;
-      align-items: center; justify-content: center;
-      padding: 1rem;
-    }
+    /* Modales */
+    .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; }
     .modal-bg.open { display: flex; }
-    .modal {
-      background: var(--white); border-radius: 12px;
-      width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0,0,0,.3); animation: slideUp .2s ease;
-    }
-    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .modal-head {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border);
-      background: var(--navy); color: var(--white); border-radius: 12px 12px 0 0;
-    }
+    .modal { background: var(--white); border-radius: 12px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); background: var(--navy); color: var(--white); border-radius: 12px 12px 0 0; }
     .modal-head h3 { font-family: 'Playfair Display', serif; font-size: 1.05rem; }
-    .modal-close { background: none; border: none; color: rgba(255,255,255,.7); font-size: 1.4rem; cursor: pointer; line-height: 1; }
+    .modal-close { background: none; border: none; color: rgba(255,255,255,.7); font-size: 1.4rem; cursor: pointer; }
     .modal-body { padding: 1.5rem; }
     .modal-field { margin-bottom: 1.1rem; }
-    .modal-field label { display: block; font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); margin-bottom: .35rem; }
-    .modal-field input,
-    .modal-field textarea,
-    .modal-field select {
-      width: 100%; border: 1.5px solid #D1D5DB; border-radius: 6px;
-      padding: .6rem .85rem; font-size: .9rem; outline: none; transition: border-color .2s;
-      font-family: 'Inter', sans-serif;
-    }
-    .modal-field input:focus,
-    .modal-field textarea:focus,
-    .modal-field select:focus { border-color: var(--gold); }
-    .modal-field textarea { resize: vertical; min-height: 80px; }
+    .modal-field label { display: block; font-size: .72rem; font-weight: 600; text-transform: uppercase; color: var(--gray); margin-bottom: .35rem; }
+    .modal-field input, .modal-field textarea, .modal-field select { width: 100%; border: 1.5px solid #D1D5DB; border-radius: 6px; padding: .6rem .85rem; font-size: .9rem; outline: none; font-family: 'Inter', sans-serif; }
+    .modal-field input:focus, .modal-field textarea:focus, .modal-field select:focus { border-color: var(--gold); }
     
     .modal-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
     @media (min-width: 480px) { .modal-grid { grid-template-columns: 1fr 1fr; } }
-    .modal-actions { display: flex; gap: .75rem; justify-content: flex-end; padding-top: .5rem; flex-wrap: wrap; }
-    .modal-actions button { flex: 1; }
-    @media (min-width: 480px) { .modal-actions button { flex: none; } }
-    .btn-save {
-      background: var(--navy); color: var(--white); border: none;
-      border-radius: 6px; padding: .6rem 1.4rem; font-weight: 600; cursor: pointer; transition: background .2s;
-    }
-    .btn-save:hover { background: var(--navy2); }
-    .btn-cancel { background: var(--cream); border: 1.5px solid var(--border); border-radius: 6px; padding: .6rem 1.2rem; cursor: pointer; font-size: .9rem; }
+    .modal-actions { display: flex; gap: .75rem; justify-content: flex-end; padding-top: .5rem; }
+    .btn-save { background: var(--navy); color: var(--white); border: none; border-radius: 6px; padding: .6rem 1.4rem; font-weight: 600; cursor: pointer; }
+    .btn-cancel { background: var(--cream); border: 1.5px solid var(--border); border-radius: 6px; padding: .6rem 1.2rem; cursor: pointer; }
 
-    /* Toast */
-    .toast {
-      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 2000;
-      background: var(--navy); color: var(--white); padding: .8rem 1.3rem;
-      border-radius: 8px; font-size: .88rem; box-shadow: 0 8px 24px rgba(0,0,0,.2);
-      opacity: 0; transition: opacity .3s; pointer-events: none;
-      border-left: 4px solid var(--gold);
-    }
+    /* Indicador de Leyendas de Colores */
+    .cal-legend { display: flex; gap: 1.5rem; margin-bottom: 1rem; font-size: 0.85rem; font-weight: 500; }
+    .legend-item { display: flex; align-items: center; gap: 0.5rem; }
+    .dot { width: 14px; height: 14px; border-radius: 4px; }
+
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 2000; background: var(--navy); color: var(--white); padding: .8rem 1.3rem; border-radius: 8px; font-size: .88rem; opacity: 0; transition: opacity .3s; border-left: 4px solid var(--gold); pointer-events: none;}
     .toast.show { opacity: 1; }
   </style>
 </head>
@@ -301,7 +239,7 @@
   <div class="top-bar">
     <div class="top-bar-left">
       <div class="top-logo">JM</div>
-      <h2>Panel de Consultas</h2>
+      <h2>Panel de Consultas y Control</h2>
     </div>
     <div class="top-bar-right">
       <span id="admin-email-label"></span>
@@ -331,8 +269,11 @@
     </div>
 
     <div class="view-selector">
-      <button class="btn-view-tab active" id="tab-lista" onclick="cambiarVistaPrincipal('lista')">📋 Lista de Consultas</button>
-      <button class="btn-view-tab" id="tab-calendario" onclick="cambiarVistaPrincipal('calendario')">📅 Calendario de Citas</button>
+      <div class="tab-buttons">
+        <button class="btn-view-tab active" id="tab-lista" onclick="cambiarVistaPrincipal('lista')">📋 Lista de Consultas</button>
+        <button class="btn-view-tab" id="tab-calendario" onclick="cambiarVistaPrincipal('calendario')">📅 Calendario General</button>
+      </div>
+      <button class="btn-add-diligencia" onclick="abrirModalDiligencia()">⚖️ + Agregar Diligencia</button>
     </div>
 
     <div id="lista-wrap">
@@ -346,7 +287,7 @@
           <div class="tab" onclick="setTab('aprobada',this)">Aprobadas</div>
           <div class="tab" onclick="setTab('rechazada',this)">Rechazadas</div>
         </div>
-        <button class="btn-refresh" onclick="cargarConsultas()">↻ Actualizar</button>
+        <button class="btn-refresh" onclick="cargarDatosTotales()">↻ Actualizar</button>
       </div>
 
       <div class="table-wrap">
@@ -370,9 +311,12 @@
     </div>
 
     <div id="calendar-wrap">
+      <div class="cal-legend">
+        <div class="legend-item"><div class="dot" style="background:#065F46"></div> Citas Clientes (Aprobadas)</div>
+        <div class="legend-item"><div class="dot" style="background:#C9A84C"></div> Diligencias / Trámites Abogado</div>
+      </div>
       <div id="calendar"></div>
     </div>
-
   </div>
 </div>
 
@@ -442,7 +386,7 @@
 
       <div class="modal-field">
         <label>Notas internas / Detalles de la Cita</label>
-        <textarea id="m-notes" rows="3" placeholder="Observaciones del abogado o dirección de la cita…"></textarea>
+        <textarea id="m-notes" rows="3"></textarea>
       </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
@@ -452,10 +396,54 @@
   </div>
 </div>
 
+<div class="modal-bg" id="modal-diligencia-bg" onclick="if(event.target===this)cerrarModalDiligencia()">
+  <div class="modal">
+    <div class="modal-head" style="background: var(--navy2)">
+      <h3 id="modal-diligencia-title">Registrar Diligencia Jurídica</h3>
+      <button class="modal-close" onclick="cerrarModalDiligencia()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="d-id" />
+      <div class="modal-field">
+        <label>Título / Tipo de Diligencia</label>
+        <input type="text" id="d-titulo" placeholder="Ej: Audiencia de Juicio, Trámite Notaría, Fiscalía..." required />
+      </div>
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label>Fecha del Evento</label>
+          <input type="date" id="d-fecha" onchange="validarDiaSemana(this)" required />
+        </div>
+        <div class="modal-field">
+          <label>Hora de Inicio</label>
+          <select id="d-hora" required>
+            <option value="08:00">08:00 AM</option>
+            <option value="09:00">09:00 AM</option>
+            <option value="10:00">10:00 AM</option>
+            <option value="11:00">11:00 AM</option>
+            <option value="12:00">12:00 PM</option>
+            <option value="13:00">01:00 PM</option>
+            <option value="14:00">02:00 PM</option>
+            <option value="15:00">03:00 PM</option>
+            <option value="16:00">04:00 PM</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Descripción / Observaciones Adicionales</label>
+        <textarea id="d-descripcion" rows="4" placeholder="Detalles de la causa judicial o dirección física..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="cerrarModalDiligencia()">Cancelar</button>
+        <button class="btn-save" style="background:var(--gold); color: var(--navy);" onclick="guardarDiligencia()">⚖️ Guardar Diligencia</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-  // ── CONFIG ─────────────────────────────────────────────────
+  // ── CONFIG ──
   const SUPABASE_URL = 'https://ctbnbikbwgujqglcobcl.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Ym5iaWtid2d1anFnbGNvYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTk3MzQsImV4cCI6MjA5Nzc3NTczNH0.MbaUNGXZ5HEihaQDPXjERxirOLncfe52kqoBrEJhBZw';
   
@@ -465,10 +453,11 @@
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let todasConsultas = [];
+  let todasDiligencias = [];
   let filtroActual   = 'todos';
   let calendar       = null;
 
-  // ── LOGIN ───────────────────────────────────────────────────
+  // ── LOGIN ──
   function doLogin() {
     const email = document.getElementById('login-email').value.trim();
     const pass  = document.getElementById('login-pass').value;
@@ -479,7 +468,7 @@
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('admin-screen').style.display = 'block';
       document.getElementById('admin-email-label').textContent = email;
-      cargarConsultas();
+      cargarDatosTotales();
     } else {
       err.style.display = 'block';
       setTimeout(() => err.style.display = 'none', 3000);
@@ -498,11 +487,10 @@
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('admin-screen').style.display = 'block';
       document.getElementById('admin-email-label').textContent = s;
-      cargarConsultas();
+      cargarDatosTotales();
     }
   });
 
-  // ── CONTROL DE VISTAS PRINCIPALES ───────────────────────────
   function cambiarVistaPrincipal(vista) {
     const listWrap = document.getElementById('lista-wrap');
     const calWrap  = document.getElementById('calendar-wrap');
@@ -523,72 +511,29 @@
     }
   }
 
-  // ── INITIALIZE FULLCALENDAR ────────────────────────────────
-  function initCalendario() {
-    const calendarEl = document.getElementById('calendar');
-    
-    // Mapear consultas aprobadas que tengan fecha de cita agendada
-    const eventos = todasConsultas
-      .filter(r => r.estado === 'aprobada' && r.fecha_cita)
-      .map(r => {
-        return {
-          id: r.id,
-          title: `Cita: ${r.nombre} (${r.codigo})`,
-          start: r.fecha_cita, // Formato esperado ISO: 'YYYY-MM-DDTHH:mm:ss' o similar
-          backgroundColor: '#065F46',
-          borderColor: '#065F46',
-          extendedProps: r
-        };
-      });
-
-    if (calendar) {
-      calendar.destroy();
-    }
-
-    calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: 'dayGridMonth',
-      locale: 'es',
-      headerToolbar: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-      },
-      buttonText: {
-        today: 'Hoy',
-        month: 'Mes',
-        week: 'Semana',
-        day: 'Día'
-      },
-      events: eventos,
-      eventClick: function(info) {
-        abrirModal(info.event.extendedProps);
-      }
-    });
-
-    calendar.render();
-  }
-
-  // ── CARGAR ──────────────────────────────────────────────────
-  async function cargarConsultas() {
-    const tbody = document.getElementById('tabla-body');
-    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Cargando datos…</td></tr>';
-
-    const { data, error } = await sb
-      .from('consultas')
-      .select('*')
-      .order('fecha', { ascending: false });
-
-    if (error) {
-      tbody.innerHTML = `<tr><td colspan="7" class="empty-state" style="color:#B91C1C">Error: ${error.message}</td></tr>`;
-      return;
-    }
-
-    todasConsultas = data || [];
-    actualizarStats();
-    renderTabla();
+  // ── CARGAR DATOS SIMULTÁNEOS ──
+  async function cargarDatosTotales() {
+    await cargarConsultas();
+    await cargarDiligencias();
     if(document.getElementById('calendar-wrap').style.display === 'block') {
       initCalendario();
     }
+  }
+
+  async function cargarConsultas() {
+    const tbody = document.getElementById('tabla-body');
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Cargando datos…</td></tr>';
+    const { data, error } = await sb.from('consultas').select('*').order('fecha', { ascending: false });
+    if (!error) {
+      todasConsultas = data || [];
+      actualizarStats();
+      renderTabla();
+    }
+  }
+
+  async function cargarDiligencias() {
+    const { data, error } = await sb.from('diligencias').select('*');
+    if (!error) { todasDiligencias = data || []; }
   }
 
   function actualizarStats() {
@@ -599,133 +544,200 @@
     document.getElementById('stat-rejected').textContent = t.filter(r=>r.estado==='rechazada').length;
   }
 
+  // ── CALENDARIO INTEGRADO ──
+  function initCalendario() {
+    const calendarEl = document.getElementById('calendar');
+    
+    // 1. Mapear citas aprobadas (Verdes)
+    const evCitas = todasConsultas
+      .filter(r => r.estado === 'aprobada' && r.fecha_cita)
+      .map(r => ({
+        id: 'cita-' + r.id,
+        title: `💼 Cita: ${r.nombre} (${r.codigo})`,
+        start: r.fecha_cita,
+        backgroundColor: '#065F46',
+        borderColor: '#065F46',
+        extendedProps: { tipo: 'cita', datos: r }
+      }));
+
+    // 2. Mapear diligencias personales (Doradas)
+    const evDiligencias = todasDiligencias.map(d => ({
+      id: 'diligencia-' + d.id,
+      title: `⚖️ Diligencia: ${d.titulo}`,
+      start: d.fecha_inicio,
+      backgroundColor: '#C9A84C',
+      borderColor: '#b2933f',
+      extendedProps: { tipo: 'diligencia', datos: d }
+    }));
+
+    // Combinar ambos orígenes
+    const todosEventos = [...evCitas, ...evDiligencias];
+
+    if (calendar) { calendar.destroy(); }
+
+    calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'es',
+      headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
+      buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Día' },
+      events: todosEventos,
+      eventClick: function(info) {
+        const props = info.event.extendedProps;
+        if(props.tipo === 'cita') {
+          abrirModal(props.datos);
+        } else {
+          abrirEditarDiligencia(props.datos);
+        }
+      }
+    });
+    calendar.render();
+  }
+
+  // ── VALIDACIÓN DE HORARIOS COMPARTIDOS ──
+  function verificarHorarioDisponible(idActual, fechaVal, horaVal, tipo = 'cita') {
+    const ahora = new Date();
+    const fechaSeleccionada = new Date(`${fechaVal}T${horaVal}:00`);
+
+    if (fechaSeleccionada < ahora) {
+      alert('❌ No puedes reservar un espacio en una fecha u hora que ya ha pasado.');
+      return false;
+    }
+
+    const fechaStringBuscada = `${fechaVal}T${horaVal}:00`;
+
+    // Buscar si choca con una cita ya existente
+    const chocaConCita = todasConsultas.some(r => 
+      r.estado === 'aprobada' && r.fecha_cita && r.fecha_cita.startsWith(fechaStringBuscada) && (tipo !== 'cita' || r.id !== idActual)
+    );
+
+    // Buscar si choca con otra diligencia interna
+    const chocaConDiligencia = todasDiligencias.some(d => 
+      d.fecha_inicio && d.fecha_inicio.startsWith(fechaStringBuscada) && (tipo !== 'diligencia' || d.id !== idActual)
+    );
+
+    if (chocaConCita || chocaConDiligencia) {
+      alert('❌ Alerta: Ese bloque horario ya está ocupado (ya sea por una cita de cliente o una diligencia programada). Por favor selecciona otro horario.');
+      return false;
+    }
+    return true;
+  }
+
+  function validarDiaSemana(input) {
+    if(!input.value) return;
+    const date = new Date(input.value + 'T00:00:00');
+    const day = date.getDay();
+    if (day === 0 || day === 6) {
+      alert('Por favor seleccione un día laborable (Lunes a Viernes).');
+      input.value = '';
+    }
+  }
+
+  // ── GESTIÓN DE DILIGENCIAS ──
+  function abrirModalDiligencia() {
+    document.getElementById('d-id').value = '';
+    document.getElementById('d-titulo').value = '';
+    document.getElementById('d-fecha').value = '';
+    document.getElementById('d-descripcion').value = '';
+    document.getElementById('modal-diligencia-title').textContent = "Registrar Diligencia Jurídica";
+    
+    const hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('d-fecha').min = hoy;
+    
+    document.getElementById('modal-diligencia-bg').classList.add('open');
+  }
+
+  function abrirEditarDiligencia(d) {
+    document.getElementById('d-id').value = d.id;
+    document.getElementById('d-titulo').value = d.titulo;
+    document.getElementById('d-descripcion').value = d.descripcion || '';
+    
+    if(d.fecha_inicio) {
+      const parts = d.fecha_inicio.split('T');
+      document.getElementById('d-fecha').value = parts[0];
+      if(parts[1]) document.getElementById('d-hora').value = parts[1].substring(0,5);
+    }
+    document.getElementById('modal-diligencia-title').textContent = "Editar Diligencia";
+    document.getElementById('modal-diligencia-bg').classList.add('open');
+  }
+
+  function cerrarModalDiligencia() { document.getElementById('modal-diligencia-bg').classList.remove('open'); }
+
+  async function guardarDiligencia() {
+    const id = document.getElementById('d-id').value;
+    const titulo = document.getElementById('d-titulo').value.trim();
+    const fecha = document.getElementById('d-fecha').value;
+    const hora = document.getElementById('d-hora').value;
+    const descripcion = document.getElementById('d-descripcion').value.trim();
+
+    if(!titulo || !fecha || !hora) { alert('Complete los campos obligatorios.'); return; }
+
+    if(!verificarHorarioDisponible(id, fecha, hora, 'diligencia')) return;
+
+    const fullFecha = `${fecha}T${hora}:00`;
+    const datos = { titulo, fecha_inicio: fullFecha, descripcion };
+
+    if(id) {
+      // Editar existente
+      const { error } = await sb.from('diligencias').update(datos).eq('id', id);
+      if(error) { alert(error.message); return; }
+    } else {
+      // Insertar nuevo
+      const { error } = await sb.from('diligencias').insert([datos]);
+      if(error) { alert(error.message); return; }
+    }
+
+    cerrarModalDiligencia();
+    toast('⚖️ Diligencia guardada e indexada en el calendario');
+    cargarDatosTotales();
+  }
+
+  // ── CONTROL DE RENDER DE TABLAS Y FILTROS ──
   function renderTabla() {
     const q     = document.getElementById('search-input').value.toLowerCase();
     const tbody  = document.getElementById('tabla-body');
 
     let filas = todasConsultas
       .filter(r => filtroActual === 'todos' || r.estado === filtroActual)
-      .filter(r =>
-        !q ||
-        r.nombre.toLowerCase().includes(q) ||
-        r.cedula.includes(q) ||
-        r.codigo.toLowerCase().includes(q) ||
-        r.celular.includes(q)
-      );
+      .filter(r => !q || r.nombre.toLowerCase().includes(q) || r.cedula.includes(q) || r.codigo.toLowerCase().includes(q));
 
     if (!filas.length) {
-      tbody.innerHTML = `<tr><td colspan="7" class="empty-state">
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        <p>No hay consultas para mostrar</p>
-      </td></tr>`;
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><p>No hay registros</p></td></tr>';
       return;
     }
 
     tbody.innerHTML = filas.map(r => {
-      const fecha = r.fecha ? new Date(r.fecha).toLocaleDateString('es-EC', {day:'2-digit',month:'short',year:'numeric'}) : '—';
+      const f = r.fecha ? new Date(r.fecha).toLocaleDateString('es-EC', {day:'2-digit',month:'short',year:'numeric'}) : '—';
       return `<tr>
-        <td data-label="Código"><span class="code-cell">${r.codigo}</span></td>
-        <td data-label="Cliente">${esc(r.nombre)}</td>
-        <td data-label="Cédula">${esc(r.cedula)}</td>
-        <td data-label="Celular">${esc(r.celular)}</td>
-        <td data-label="Fecha">${fecha}</td>
-        <td data-label="Estado"><span class="badge ${r.estado}">${estadoLabel(r.estado)}</span></td>
-        <td data-label="Acciones">
+        <td><span class="code-cell">${r.codigo}</span></td>
+        <td>${esc(r.nombre)}</td>
+        <td>${esc(r.cedula)}</td>
+        <td>${esc(r.celular)}</td>
+        <td>${f}</td>
+        <td><span class="badge ${r.estado}">${estadoLabel(r.estado)}</span></td>
+        <td>
           <div class="actions">
-            <button class="action-btn btn-view" onclick='abrirModal(${JSON.stringify(r)})'>✏️ Ver/Editar</button>
-            ${r.estado!=='aprobada' ? `<button class="action-btn btn-approve" onclick="abrirModalConEstadoAprobado(${JSON.stringify(r)})">✅</button>` : ''}
-            ${r.estado!=='rechazada' ? `<button class="action-btn btn-reject" onclick="cambiarEstado('${r.id}','rechazada')">❌</button>` : ''}
+            <button class="action-btn btn-view" onclick='abrirModal(${JSON.stringify(r)})'>✏️ Editar</button>
             <button class="action-btn btn-wa" onclick='enviarWA(${JSON.stringify(r)})'>💬</button>
-            ${r.estado === 'rechazada' ? `<button class="action-btn btn-delete" onclick="eliminarConsulta('${r.id}', '${r.codigo}')">🗑️ Eliminar</button>` : ''}
           </div>
         </td>
       </tr>`;
     }).join('');
   }
 
-  function estadoLabel(e) {
-    return { pendiente:'⏳ Pendiente', aprobada:'✅ Aprobada', rechazada:'❌ Rechazada' }[e] || e;
-  }
+  function estadoLabel(e) { return { pendiente:'⏳ Pendiente', aprobada:'✅ Aprobada', rechazada:'❌ Rechazada' }[e] || e; }
   function esc(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-  function setTab(val, el) {
-    filtroActual = val;
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    renderTabla();
-  }
-
+  function setTab(val, el) { filtroActual = val; document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); renderTabla(); }
   function filtrar() { renderTabla(); }
 
-  // ── CAMBIO DE ESTADO DIRECTO DESDE LISTA ──
-  function abrirModalConEstadoAprobado(r) {
-    abrirModal(r);
-    document.getElementById('m-estado').value = 'aprobada';
-    toggleSeccionCita('aprobada');
-  }
-
-  async function cambiarEstado(id, nuevoEstado) {
-    const { error } = await sb.from('consultas').update({ estado: nuevoEstado }).eq('id', id);
-    if (error) { toast('❌ Error: ' + error.message); return; }
-    
-    const registroModificado = todasConsultas.find(r => r.id === id);
-    
-    todasConsultas = todasConsultas.map(r => r.id === id ? {...r, estado: nuevoEstado} : r);
-    actualizarStats();
-    renderTabla();
-    toast(nuevoEstado === 'aprobada' ? '✅ Consulta aprobada' : '❌ Consulta rechazada');
-
-    if (registroModificado) {
-      const registroActualizado = {...registroModificado, estado: nuevoEstado};
-      setTimeout(() => {
-        enviarWA(registroActualizado);
-      }, 500);
-    }
-  }
-
-  // ── VALIDACIÓN DIAS LABORALES ──
-  function validarDiaSemana(input) {
-    if(!input.value) return;
-    const date = new Date(input.value + 'T00:00:00');
-    const day = date.getDay(); // 0 = Domingo, 6 = Sábado
-    if (day === 0 || day === 6) {
-      alert('Por favor seleccione un día laborable de Lunes a Viernes.');
-      input.value = '';
-    }
-  }
-
- function toggleSeccionCita(estado) {
+  function toggleSeccionCita(estado) {
     const seccion = document.getElementById('seccion-cita');
     if(estado === 'aprobada') {
       seccion.style.display = 'block';
-      
-      // Bloquear días pasados en el input tipo date
-      const hoy = new Date();
-      const yyyy = hoy.getFullYear();
-      const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-      const dd = String(hoy.getDate()).padStart(2, '0');
-      document.getElementById('m-fecha-cita').min = `${yyyy}-${mm}-${dd}`;
-    } else {
-      seccion.style.display = 'none';
-    }
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('m-fecha-cita').min = hoy;
+    } else { seccion.style.display = 'none'; }
   }
 
-  // ── ELIMINAR SOLICITUD ───────────────────
-  async function eliminarConsulta(id, codigo) {
-    const confirmar = confirm(`¿Está seguro de que desea eliminar permanentemente la solicitud ${codigo}? Esta acción no se puede deshacer.`);
-    if (!confirmar) return;
-
-    const { error } = await sb.from('consultas').delete().eq('id', id);
-    if (error) { toast('❌ Error al eliminar: ' + error.message); return; }
-
-    todasConsultas = todasConsultas.filter(r => r.id !== id);
-    actualizarStats();
-    renderTabla();
-    if(calendar) initCalendario();
-    toast(`🗑️ Solicitud ${codigo} eliminada correctamente`);
-  }
-
-  // ── MODAL ────────────────────────────────────────────────────
   function abrirModal(r) {
     document.getElementById('m-id').value     = r.id;
     document.getElementById('m-nombre').value = r.nombre;
@@ -735,108 +747,66 @@
     document.getElementById('m-motivo').value = r.motivo;
     document.getElementById('m-estado').value = r.estado;
     document.getElementById('m-notes').value  = r.notas || '';
-    document.getElementById('modal-title').textContent = `Consulta — ${r.codigo}`;
-
-    // Desglosar fecha_cita guardada en la base de datos (Ej: "2026-04-15T09:00:00")
+    
     if (r.fecha_cita) {
       const parts = r.fecha_cita.split('T');
       document.getElementById('m-fecha-cita').value = parts[0];
-      if(parts[1]) {
-        document.getElementById('m-hora-cita').value = parts[1].substring(0, 5);
-      } else {
-        document.getElementById('m-hora-cita').value = "";
-      }
+      if(parts[1]) document.getElementById('m-hora-cita').value = parts[1].substring(0, 5);
     } else {
       document.getElementById('m-fecha-cita').value = "";
       document.getElementById('m-hora-cita').value = "";
     }
-
     toggleSeccionCita(r.estado);
     document.getElementById('modal-bg').classList.add('open');
   }
 
-  function cerrarModal() {
-    document.getElementById('modal-bg').classList.remove('open');
-  }
+  function cerrarModal() { document.getElementById('modal-bg').classList.remove('open'); }
 
-  // ── GUARDAR CAMBIOS DESDE MODAL ──────────
   async function guardarCambios() {
-    const id           = document.getElementById('m-id').value;
-    const nuevoEstado  = document.getElementById('m-estado').value;
-    const fechaVal     = document.getElementById('m-fecha-cita').value;
-    const horaVal      = document.getElementById('m-hora-cita').value;
-
+    const id = document.getElementById('m-id').value;
+    const nuevoEstado = document.getElementById('m-estado').value;
+    const fechaVal = document.getElementById('m-fecha-cita').value;
+    const horaVal = document.getElementById('m-hora-cita').value;
     let fechaCitaCompleta = null;
 
     if (nuevoEstado === 'aprobada') {
-      if (!fechaVal || !horaVal) {
-        alert('Para aprobar la consulta debe asignar una Fecha y Hora válidas para la cita.');
-        return;
-      }
+      if (!fechaVal || !horaVal) { alert('Asigne Fecha y Hora válidas.'); return; }
+      if (!verificarHorarioDisponible(id, fechaVal, horaVal, 'cita')) return;
       fechaCitaCompleta = `${fechaVal}T${horaVal}:00`;
     }
 
     const update = {
-      nombre:     document.getElementById('m-nombre').value.trim(),
-      cedula:     document.getElementById('m-cedula').value.trim(),
-      celular:    document.getElementById('m-celular').value.trim(),
-      motivo:     document.getElementById('m-motivo').value.trim(),
-      estado:     nuevoEstado,
-      notas:      document.getElementById('m-notes').value.trim(),
+      nombre: document.getElementById('m-nombre').value.trim(),
+      cedula: document.getElementById('m-cedula').value.trim(),
+      celular: document.getElementById('m-celular').value.trim(),
+      motivo: document.getElementById('m-motivo').value.trim(),
+      estado: nuevoEstado,
+      notas: document.getElementById('m-notes').value.trim(),
       fecha_cita: fechaCitaCompleta
     };
 
     const { error } = await sb.from('consultas').update(update).eq('id', id);
-    if (error) { toast('❌ Error: ' + error.message); return; }
-
-    todasConsultas = todasConsultas.map(r => r.id === id ? {...r, ...update} : r);
-    actualizarStats();
-    renderTabla();
-    if(calendar) initCalendario();
-    cerrarModal();
-    toast('💾 Cambios guardados correctamente');
-
-    const registroCompleto = { id, ...update, codigo: document.getElementById('m-codigo').value };
-    setTimeout(() => {
-      enviarWA(registroCompleto);
-    }, 500);
+    if (!error) {
+      cerrarModal();
+      toast('💾 Cambios guardados e indexados correctamente');
+      cargarDatosTotales();
+    }
   }
 
-  // ── WHATSAPP FORMATO SEGURO ─────────────────────────────────────────────────
   function enviarWA(r) {
     const estadoTexto = { pendiente:'PENDIENTE ⏳', aprobada:'APROBADA ✅', rechazada:'RECHAZADA ❌' }[r.estado];
-    
     let infoCita = '';
     if(r.estado === 'aprobada' && r.fecha_cita) {
       const parts = r.fecha_cita.split('T');
-      const fechaLegible = new Date(parts[0]+'T00:00:00').toLocaleDateString('es-EC', {day:'2-digit',month:'long',year:'numeric'});
-      infoCita = `📅 *Detalles de su cita agendada:*\n*Fecha:* ${fechaLegible}\n*Hora:* ${parts[1].substring(0,5)} hs\n\n`;
+      const fLegible = new Date(parts[0]+'T00:00:00').toLocaleDateString('es-EC', {day:'2-digit',month:'long',year:'numeric'});
+      infoCita = `📅 *Detalles de su cita agendada:*\n*Fecha:* ${fLegible}\n*Hora:* ${parts[1].substring(0,5)} hs\n\n`;
     }
-
-    const msg = encodeURIComponent(
-      `*ESTUDIO JURÍDICO JORGE MEZA ESPÍN*\n` +
-      `Estimado/a ${r.nombre},\n\n` +
-      `Su solicitud con código *${r.codigo}* ha sido revisada.\n` +
-      `Estado actual: *${estadoTexto}*\n\n` +
-      infoCita +
-      `${r.notas ? '📋 Nota del Abogado:\n' + r.notas + '\n\n' : ''}` +
-      `Por favor contáctenos al responder este mensaje si tiene alguna consulta adicional o requiere reprogramar.\n\n` +
-      `_Atte. Estudio Jurídico Jorge Meza Espín_`
-    );
-    
-    let numeroLimpio = r.celular.replace(/\D/g, '');
-    if (numeroLimpio.length === 10 && numeroLimpio.startsWith('0')) {
-      numeroLimpio = '593' + numeroLimpio.substring(1);
-    }
-    
-    window.open(`https://wa.me/${numeroLimpio}?text=${msg}`, '_blank');
+    const msg = encodeURIComponent(`*ESTUDIO JURÍDICO JORGE MEZA ESPÍN*\nEstimado/a ${r.nombre},\n\nSu solicitud *${r.codigo}* está: *${estadoTexto}*\n\n${infoCita}_Atte. Estudio Jurídico Jorge Meza Espín_`);
+    window.open(`https://wa.me/${r.celular.replace(/\D/g, '')}?text=${msg}`, '_blank');
   }
 
-  // ── TOAST ────────────────────────────────────────────────────
   function toast(msg) {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
+    const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 3000);
   }
 </script>
