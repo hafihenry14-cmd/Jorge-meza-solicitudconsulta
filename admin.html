@@ -213,6 +213,21 @@
 
     .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 2000; background: var(--navy); color: var(--white); padding: .8rem 1.3rem; border-radius: 8px; font-size: .88rem; opacity: 0; transition: opacity .3s; border-left: 4px solid var(--gold); pointer-events: none;}
     .toast.show { opacity: 1; }
+
+    /* ── VISTA RÁPIDA DILIGENCIAS ── */
+    .modal-dilig { max-width: 680px; }
+    .dilig-list  { display: flex; flex-direction: column; gap: .75rem; }
+    .dilig-item  {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+      background: var(--cream); border-radius: 8px; padding: .9rem 1rem;
+      border-left: 4px solid var(--gold);
+    }
+    .dilig-item-info { flex: 1; min-width: 0; }
+    .dilig-item-titulo { font-weight: 600; font-size: .9rem; color: var(--navy); margin-bottom: .2rem; }
+    .dilig-item-fecha  { font-size: .78rem; color: var(--gray); margin-bottom: .3rem; }
+    .dilig-item-desc   { font-size: .8rem; color: #4B5563; white-space: pre-wrap; }
+    .dilig-item-actions { display: flex; gap: .4rem; flex-shrink: 0; }
+    .dilig-empty { text-align: center; padding: 2.5rem; color: var(--gray); font-size: .9rem; }
   </style>
 </head>
 <body>
@@ -272,6 +287,7 @@
       <div class="tab-buttons">
         <button class="btn-view-tab active" id="tab-lista" onclick="cambiarVistaPrincipal('lista')">📋 Lista de Consultas</button>
         <button class="btn-view-tab" id="tab-calendario" onclick="cambiarVistaPrincipal('calendario')">📅 Calendario General</button>
+        <button class="btn-view-tab" id="tab-diligencias-lista" onclick="abrirVistaRapidaDiligencias()">⚖️ Lista de Diligencias</button>
       </div>
       <button class="btn-add-diligencia" onclick="abrirModalDiligencia()">⚖️ + Agregar Diligencia</button>
     </div>
@@ -436,6 +452,18 @@
         <button class="btn-cancel" onclick="cerrarModalDiligencia()">Cancelar</button>
         <button class="btn-save" style="background:var(--gold); color: var(--navy);" onclick="guardarDiligencia()">⚖️ Guardar Diligencia</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-dilig-lista-bg" onclick="if(event.target===this)cerrarVistaRapidaDiligencias()">
+  <div class="modal modal-dilig">
+    <div class="modal-head" style="background: var(--navy2)">
+      <h3>⚖️ Lista de Diligencias</h3>
+      <button class="modal-close" onclick="cerrarVistaRapidaDiligencias()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="dilig-lista-contenido" class="dilig-list"></div>
     </div>
   </div>
 </div>
@@ -661,6 +689,59 @@
   }
 
   function cerrarModalDiligencia() { document.getElementById('modal-diligencia-bg').classList.remove('open'); }
+
+  // ── VISTA RÁPIDA LISTA DE DILIGENCIAS ──
+  function abrirVistaRapidaDiligencias() {
+    renderListaDiligencias();
+    document.getElementById('modal-dilig-lista-bg').classList.add('open');
+  }
+
+  function cerrarVistaRapidaDiligencias() {
+    document.getElementById('modal-dilig-lista-bg').classList.remove('open');
+  }
+
+  function renderListaDiligencias() {
+    const contenedor = document.getElementById('dilig-lista-contenido');
+
+    if (!todasDiligencias.length) {
+      contenedor.innerHTML = '<div class="dilig-empty">No hay diligencias registradas aún.<br>Usa el botón <strong>⚖️ + Agregar Diligencia</strong> para crear una.</div>';
+      return;
+    }
+
+    // Ordenar de más próxima a más lejana
+    const ordenadas = [...todasDiligencias].sort((a, b) => new Date(a.fecha_inicio) - new Date(b.fecha_inicio));
+
+    contenedor.innerHTML = ordenadas.map(d => {
+      const fechaObj = d.fecha_inicio ? new Date(d.fecha_inicio) : null;
+      const fechaLegible = fechaObj
+        ? fechaObj.toLocaleDateString('es-EC', { weekday:'long', day:'2-digit', month:'long', year:'numeric' })
+          + ' — ' + fechaObj.toLocaleTimeString('es-EC', { hour:'2-digit', minute:'2-digit' })
+        : '—';
+      const desc = d.descripcion ? esc(d.descripcion) : '<em style="color:#9CA3AF">Sin descripción</em>';
+      const dJson = JSON.stringify(d).replace(/'/g, "&#39;");
+      return `
+        <div class="dilig-item">
+          <div class="dilig-item-info">
+            <div class="dilig-item-titulo">⚖️ ${esc(d.titulo)}</div>
+            <div class="dilig-item-fecha">📅 ${fechaLegible}</div>
+            <div class="dilig-item-desc">${desc}</div>
+          </div>
+          <div class="dilig-item-actions">
+            <button class="action-btn btn-view" onclick='cerrarVistaRapidaDiligencias(); abrirEditarDiligencia(${dJson})'>✏️ Editar</button>
+            <button class="action-btn btn-delete" onclick='eliminarDiligencia(${d.id})'>🗑️</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  async function eliminarDiligencia(id) {
+    if (!confirm('¿Eliminar esta diligencia? Esta acción no se puede deshacer.')) return;
+    const { error } = await sb.from('diligencias').delete().eq('id', id);
+    if (error) { alert(error.message); return; }
+    toast('🗑️ Diligencia eliminada');
+    await cargarDatosTotales();
+    renderListaDiligencias();
+  }
 
   async function guardarDiligencia() {
     const id = document.getElementById('d-id').value;
