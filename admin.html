@@ -169,6 +169,7 @@
     .badge.pendiente  { background: var(--pendingbg);  color: var(--pending); }
     .badge.aprobada   { background: var(--approvedbg); color: var(--approved); }
     .badge.rechazada  { background: var(--rejectedbg); color: var(--rejected); }
+    .badge.caducado   { background: #FEE2E2; color: #991B1B; margin-left: .4rem; }
 
     .code-cell { font-family: 'Playfair Display', serif; font-size: .9rem; color: var(--navy); font-weight: 600; }
     .actions { display: flex; gap: .4rem; flex-wrap: wrap; }
@@ -228,6 +229,7 @@
     .dilig-item-desc   { font-size: .8rem; color: #4B5563; white-space: pre-wrap; }
     .dilig-item-actions { display: flex; gap: .4rem; flex-shrink: 0; }
     .dilig-empty { text-align: center; padding: 2.5rem; color: var(--gray); font-size: .9rem; }
+    .dilig-item.caducada { border-left-color: #EF4444; }
   </style>
 </head>
 <body>
@@ -485,6 +487,72 @@
   let filtroActual   = 'todos';
   let calendar       = null;
 
+  // ── ZONA HORARIA ECUADOR (UTC-5, sin horario de verano) ──
+  const TZ_EC = 'America/Guayaquil';
+  const OFFSET_EC = '-05:00';
+
+  // Devuelve la fecha de HOY en formato YYYY-MM-DD usando la hora LOCAL del
+  // navegador (evita el error clásico de toISOString(), que usa UTC y puede
+  // mostrar el día equivocado cerca de la medianoche).
+  function hoyLocal() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  // Convierte el valor crudo guardado en Supabase a un objeto Date real.
+  // Funciona tanto si la columna es "timestamp" (sin zona) como
+  // "timestamptz" (con zona), porque deja que el motor JS interprete
+  // cualquier offset/'Z' presente en el string.
+  // Caso especial: si es una fecha "pura" (YYYY-MM-DD, sin hora), se ancla
+  // al mediodía local para evitar el clásico error de "new Date('YYYY-MM-DD')"
+  // interpretado como medianoche UTC, que puede mostrar el día anterior.
+  function parsearFecha(fechaStr) {
+    if (!fechaStr) return null;
+    const soloFecha = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fechaStr);
+    if (soloFecha) {
+      const [, y, m, d] = soloFecha;
+      return new Date(+y, +m - 1, +d, 12, 0, 0);
+    }
+    const f = new Date(fechaStr);
+    return isNaN(f.getTime()) ? null : f;
+  }
+
+  // Indica si una fecha/hora guardada ya pasó respecto al momento actual.
+  function esFechaPasada(fechaStr) {
+    const f = parsearFecha(fechaStr);
+    return f ? f.getTime() < Date.now() : false;
+  }
+
+  // Formatea una fecha guardada SIEMPRE en la zona horaria de Ecuador, sin
+  // importar en qué zona horaria esté el navegador de quien lo consulta.
+  function formatearFechaEC(fechaStr, opciones) {
+    const f = parsearFecha(fechaStr);
+    if (!f) return '—';
+    return f.toLocaleDateString('es-EC', { timeZone: TZ_EC, ...opciones });
+  }
+  function formatearHoraEC(fechaStr) {
+    const f = parsearFecha(fechaStr);
+    if (!f) return '';
+    return f.toLocaleTimeString('es-EC', { timeZone: TZ_EC, hour: '2-digit', minute: '2-digit' });
+  }
+
+  // Descompone una fecha guardada en {fecha:'YYYY-MM-DD', hora:'HH:mm'} en
+  // hora de Ecuador — usado para rellenar los campos de los formularios de
+  // edición sin importar cómo Supabase haya devuelto el valor.
+  function partesFechaEC(fechaStr) {
+    const f = parsearFecha(fechaStr);
+    if (!f) return { fecha: '', hora: '' };
+    const fmt = new Intl.DateTimeFormat('en-CA', {
+      timeZone: TZ_EC, year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false
+    });
+    const p = fmt.formatToParts(f).reduce((acc, x) => (acc[x.type] = x.value, acc), {});
+    return { fecha: `${p.year}-${p.month}-${p.day}`, hora: `${p.hour}:${p.minute}` };
+  }
+
   // ── LOGIN ──
   function doLogin() {
     const email = document.getElementById('login-email').value.trim();
@@ -606,6 +674,7 @@
     calendar = new FullCalendar.Calendar(calendarEl, {
       initialView: 'dayGridMonth',
       locale: 'es',
+      timeZone: TZ_EC,
       headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
       buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Día' },
       events: todosEventos,
@@ -624,24 +693,31 @@
   // ── VALIDACIÓN DE HORARIOS COMPARTIDOS ──
   function verificarHorarioDisponible(idActual, fechaVal, horaVal, tipo = 'cita') {
     const ahora = new Date();
-    const fechaSeleccionada = new Date(`${fechaVal}T${horaVal}:00`);
+    // Se construye el instante candidato con el offset de Ecuador explícito
+    // para que la comparación sea correcta sin importar la zona horaria del navegador.
+    const fechaSeleccionada = new Date(`${fechaVal}T${horaVal}:00${OFFSET_EC}`);
 
     if (fechaSeleccionada < ahora) {
       alert('❌ No puedes reservar un espacio en una fecha u hora que ya ha pasado.');
       return false;
     }
 
-    const fechaStringBuscada = `${fechaVal}T${horaVal}:00`;
+    // Se comparan los componentes de fecha/hora ya normalizados a la zona
+    // horaria de Ecuador, sin importar cómo Supabase haya devuelto el dato
+    // (con o sin zona horaria explícita).
+    const chocaConCita = todasConsultas.some(r => {
+      if (!(r.estado === 'aprobada' && r.fecha_cita)) return false;
+      if (tipo === 'cita' && String(r.id) === String(idActual)) return false;
+      const p = partesFechaEC(r.fecha_cita);
+      return p.fecha === fechaVal && p.hora === horaVal;
+    });
 
-    // Buscar si choca con una cita ya existente
-    const chocaConCita = todasConsultas.some(r => 
-      r.estado === 'aprobada' && r.fecha_cita && r.fecha_cita.startsWith(fechaStringBuscada) && (tipo !== 'cita' || r.id !== idActual)
-    );
-
-    // Buscar si choca con otra diligencia interna
-    const chocaConDiligencia = todasDiligencias.some(d => 
-      d.fecha_inicio && d.fecha_inicio.startsWith(fechaStringBuscada) && (tipo !== 'diligencia' || d.id !== idActual)
-    );
+    const chocaConDiligencia = todasDiligencias.some(d => {
+      if (!d.fecha_inicio) return false;
+      if (tipo === 'diligencia' && String(d.id) === String(idActual)) return false;
+      const p = partesFechaEC(d.fecha_inicio);
+      return p.fecha === fechaVal && p.hora === horaVal;
+    });
 
     if (chocaConCita || chocaConDiligencia) {
       alert('❌ Alerta: Ese bloque horario ya está ocupado (ya sea por una cita de cliente o una diligencia programada). Por favor selecciona otro horario.');
@@ -668,8 +744,7 @@
     document.getElementById('d-descripcion').value = '';
     document.getElementById('modal-diligencia-title').textContent = "Registrar Diligencia Jurídica";
     
-    const hoy = new Date().toISOString().split('T')[0];
-    document.getElementById('d-fecha').min = hoy;
+    document.getElementById('d-fecha').min = hoyLocal();
     
     document.getElementById('modal-diligencia-bg').classList.add('open');
   }
@@ -680,9 +755,9 @@
     document.getElementById('d-descripcion').value = d.descripcion || '';
     
     if(d.fecha_inicio) {
-      const parts = d.fecha_inicio.split('T');
-      document.getElementById('d-fecha').value = parts[0];
-      if(parts[1]) document.getElementById('d-hora').value = parts[1].substring(0,5);
+      const { fecha, hora } = partesFechaEC(d.fecha_inicio);
+      document.getElementById('d-fecha').value = fecha;
+      if(hora) document.getElementById('d-hora').value = hora;
     }
     document.getElementById('modal-diligencia-title').textContent = "Editar Diligencia";
     document.getElementById('modal-diligencia-bg').classList.add('open');
@@ -712,23 +787,23 @@
     const ordenadas = [...todasDiligencias].sort((a, b) => new Date(a.fecha_inicio) - new Date(b.fecha_inicio));
 
     contenedor.innerHTML = ordenadas.map(d => {
-      const fechaObj = d.fecha_inicio ? new Date(d.fecha_inicio) : null;
-      const fechaLegible = fechaObj
-        ? fechaObj.toLocaleDateString('es-EC', { weekday:'long', day:'2-digit', month:'long', year:'numeric' })
-          + ' — ' + fechaObj.toLocaleTimeString('es-EC', { hour:'2-digit', minute:'2-digit' })
+      const fechaLegible = d.fecha_inicio
+        ? formatearFechaEC(d.fecha_inicio, { weekday:'long', day:'2-digit', month:'long', year:'numeric' })
+          + ' — ' + formatearHoraEC(d.fecha_inicio)
         : '—';
+      const caducada = esFechaPasada(d.fecha_inicio);
       const desc = d.descripcion ? esc(d.descripcion) : '<em style="color:#9CA3AF">Sin descripción</em>';
       const dJson = JSON.stringify(d).replace(/'/g, "&#39;");
       return `
-        <div class="dilig-item">
+        <div class="dilig-item${caducada ? ' caducada' : ''}">
           <div class="dilig-item-info">
             <div class="dilig-item-titulo">⚖️ ${esc(d.titulo)}</div>
-            <div class="dilig-item-fecha">📅 ${fechaLegible}</div>
+            <div class="dilig-item-fecha">📅 ${fechaLegible}${caducada ? '<span class="badge caducado">⏰ Caducada</span>' : ''}</div>
             <div class="dilig-item-desc">${desc}</div>
           </div>
           <div class="dilig-item-actions">
             <button class="action-btn btn-view" onclick='cerrarVistaRapidaDiligencias(); abrirEditarDiligencia(${dJson})'>✏️ Editar</button>
-            <button class="action-btn btn-delete" onclick='eliminarDiligencia(${d.id})'>🗑️</button>
+            <button class="action-btn btn-delete" onclick="eliminarDiligencia('${d.id}')">🗑️</button>
           </div>
         </div>`;
     }).join('');
@@ -754,7 +829,10 @@
 
     if(!verificarHorarioDisponible(id, fecha, hora, 'diligencia')) return;
 
-    const fullFecha = `${fecha}T${hora}:00`;
+    // Se agrega el offset de Ecuador (-05:00) explícitamente para que la
+    // hora se guarde correctamente sin importar cómo Supabase interprete
+    // la columna (timestamp o timestamptz), evitando el corrimiento horario.
+    const fullFecha = `${fecha}T${hora}:00${OFFSET_EC}`;
     const datos = { titulo, fecha_inicio: fullFecha, descripcion };
 
     if(id) {
@@ -787,14 +865,15 @@
     }
 
     tbody.innerHTML = filas.map(r => {
-      const f = r.fecha ? new Date(r.fecha).toLocaleDateString('es-EC', {day:'2-digit',month:'short',year:'numeric'}) : '—';
+      const f = formatearFechaEC(r.fecha, {day:'2-digit',month:'short',year:'numeric'});
+      const citaCaducada = r.estado === 'aprobada' && r.fecha_cita && esFechaPasada(r.fecha_cita);
       return `<tr>
         <td><span class="code-cell">${r.codigo}</span></td>
         <td>${esc(r.nombre)}</td>
         <td>${esc(r.cedula)}</td>
         <td>${esc(r.celular)}</td>
         <td>${f}</td>
-        <td><span class="badge ${r.estado}">${estadoLabel(r.estado)}</span></td>
+        <td><span class="badge ${r.estado}">${estadoLabel(r.estado)}</span>${citaCaducada ? '<span class="badge caducado">⏰ Caducada</span>' : ''}</td>
         <td>
           <div class="actions">
             <button class="action-btn btn-view" onclick='abrirModal(${JSON.stringify(r)})'>✏️ Editar</button>
@@ -815,8 +894,7 @@
     const seccion = document.getElementById('seccion-cita');
     if(estado === 'aprobada') {
       seccion.style.display = 'block';
-      const hoy = new Date().toISOString().split('T')[0];
-      document.getElementById('m-fecha-cita').min = hoy;
+      document.getElementById('m-fecha-cita').min = hoyLocal();
     } else { seccion.style.display = 'none'; }
   }
 
@@ -831,9 +909,9 @@
     document.getElementById('m-notes').value  = r.notas || '';
     
     if (r.fecha_cita) {
-      const parts = r.fecha_cita.split('T');
-      document.getElementById('m-fecha-cita').value = parts[0];
-      if(parts[1]) document.getElementById('m-hora-cita').value = parts[1].substring(0, 5);
+      const { fecha, hora } = partesFechaEC(r.fecha_cita);
+      document.getElementById('m-fecha-cita').value = fecha;
+      if(hora) document.getElementById('m-hora-cita').value = hora;
     } else {
       document.getElementById('m-fecha-cita').value = "";
       document.getElementById('m-hora-cita').value = "";
@@ -854,7 +932,8 @@
     if (nuevoEstado === 'aprobada') {
       if (!fechaVal || !horaVal) { alert('Asigne Fecha y Hora válidas.'); return; }
       if (!verificarHorarioDisponible(id, fechaVal, horaVal, 'cita')) return;
-      fechaCitaCompleta = `${fechaVal}T${horaVal}:00`;
+      // Offset explícito de Ecuador (-05:00) para evitar corrimientos de hora.
+      fechaCitaCompleta = `${fechaVal}T${horaVal}:00${OFFSET_EC}`;
     }
 
     const update = {
