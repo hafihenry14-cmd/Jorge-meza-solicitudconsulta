@@ -2,285 +2,285 @@
 <html lang="es">
 <head>
     <!-- Vista previa al compartir por WhatsApp -->
-<meta property="og:title" content="Jorge Meza Espin- Estudio Jurídico ⚖️ " />
-<meta property="og:description" content="Agenda tu consulta de manera fácil" />
-<meta property="og:image" content="https://i.imgur.com/EhRGqSL.jpeg" />
-<meta property="og:url" content="https://jorgemeza-solicitudconsulta.netlify.app/" />
-<meta property="og:type" content="website" />
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jorge Meza Espín — Estudio Jurídico</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    :root {
-      --navy:    #1B2A4A;
-      --gold:    #C9A84C;
-      --gold-lt: #E8C96A;
-      --cream:   #F8F5EF;
-      --white:   #FFFFFF;
-      --gray:    #6B7280;
-      --border:  #DDD5C8;
-      --error:   #B91C1C;
-      --success: #15803D;
-    }
+    <meta property="og:title" content="Jorge Meza Espin- Estudio Jurídico ⚖️ " />
+    <meta property="og:description" content="Agenda tu consulta de manera fácil" />
+    <meta property="og:image" content="https://i.imgur.com/EhRGqSL.jpeg" />
+    <meta property="og:url" content="https://jorgemeza-solicitudconsulta.netlify.app/" />
+    <meta property="og:type" content="website" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jorge Meza Espín — Estudio Jurídico</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      :root {
+        --navy:    #1B2A4A;
+        --gold:    #C9A84C;
+        --gold-lt: #E8C96A;
+        --cream:   #F8F5EF;
+        --white:   #FFFFFF;
+        --gray:    #6B7280;
+        --border:  #DDD5C8;
+        --error:   #B91C1C;
+        --success: #15803D;
+      }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      background: linear-gradient(rgba(250, 246, 241, 0.88), rgba(250, 246, 241, 0.88)), 
-                  url('https://i.imgur.com/bIbkMoJ.jpeg') center/cover fixed no-repeat;
-      color: var(--navy);
-      font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+      body {
+        background: linear-gradient(rgba(250, 246, 241, 0.88), rgba(250, 246, 241, 0.88)), 
+                    url('https://i.imgur.com/bIbkMoJ.jpeg') center/cover fixed no-repeat;
+        color: var(--navy);
+        font-family: 'Inter', sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
 
-    /* ── HEADER ── */
-    header {
-      background: var(--navy);
-      color: var(--white);
-      padding: 0 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 72px;
-      border-bottom: 3px solid var(--gold);
-    }
+      /* ── HEADER ── */
+      header {
+        background: var(--navy);
+        color: var(--white);
+        padding: 0 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 72px;
+        border-bottom: 3px solid var(--gold);
+      }
 
-    .logo-block { display: flex; align-items: center; gap: 1rem; }
-    .logo-icon {
-      width: 42px; height: 42px;
-      background: var(--gold);
-      border-radius: 4px;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Playfair Display', serif;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--navy);
-      flex-shrink: 0;
-    }
-    .logo-text { line-height: 1.2; }
-    .logo-text .firm { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 600; letter-spacing: 0.01em; }
-    .logo-text .tagline { font-size: 0.72rem; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; }
+      .logo-block { display: flex; align-items: center; gap: 1rem; }
+      .logo-icon {
+        width: 42px; height: 42px;
+        background: var(--gold);
+        border-radius: 4px;
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--navy);
+        flex-shrink: 0;
+      }
+      .logo-text { line-height: 1.2; }
+      .logo-text .firm { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 600; letter-spacing: 0.01em; }
+      .logo-text .tagline { font-size: 0.72rem; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; }
 
-    nav a {
-      color: rgba(255,255,255,0.75);
-      text-decoration: none;
-      font-size: 0.85rem;
-      margin-left: 1.5rem;
-      transition: color .2s;
-    }
-    nav a:hover { color: var(--gold); }
-    nav a.admin-link {
-      border: 1px solid var(--gold);
-      color: var(--gold);
-      padding: .35rem .8rem;
-      border-radius: 4px;
-      font-size: 0.78rem;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
+      nav a {
+        color: rgba(255,255,255,0.75);
+        text-decoration: none;
+        font-size: 0.85rem;
+        margin-left: 1.5rem;
+        transition: color .2s;
+      }
+      nav a:hover { color: var(--gold); }
+      nav a.admin-link {
+        border: 1px solid var(--gold);
+        color: var(--gold);
+        padding: .35rem .8rem;
+        border-radius: 4px;
+        font-size: 0.78rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
 
-    /* ── HERO (SIN FONDO AZUL) ── */
-    .hero {
-      background: transparent;
-      color: var(--navy);
-      text-align: center;
-      padding: 3rem 1.5rem 2rem;
-      position: relative;
-    }
+      /* ── HERO ── */
+      .hero {
+        background: transparent;
+        color: var(--navy);
+        text-align: center;
+        padding: 3rem 1.5rem 2rem;
+        position: relative;
+      }
 
-    .hero-eyebrow {
-      display: inline-block;
-      font-size: 0.72rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--navy);
-      margin-bottom: 1rem;
-      border-top: 1px solid var(--gold);
-      border-bottom: 1px solid var(--gold);
-      padding: .25rem 1rem;
-      font-weight: 600;
-    }
-    .hero-img {
-      display: block;
-      margin: 1.5rem auto 1rem;
-      max-width: 100%;
-      height: auto;
-      border-radius: 6px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    }
-    .hero h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(2rem, 5vw, 3.2rem);
-      font-weight: 700;
-      line-height: 1.15;
-      margin-bottom: 1rem;
-      color: var(--navy);
-    }
-    .hero h1 em { color: var(--gold); font-style: normal; }
-    .hero p {
-      max-width: 500px;
-      margin: 0 auto 1.5rem;
-      font-size: 0.95rem;
-      color: var(--navy);
-      line-height: 1.7;
-    }
+      .hero-eyebrow {
+        display: inline-block;
+        font-size: 0.72rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--navy);
+        margin-bottom: 1rem;
+        border-top: 1px solid var(--gold);
+        border-bottom: 1px solid var(--gold);
+        padding: .25rem 1rem;
+        font-weight: 600;
+      }
+      .hero-img {
+        display: block;
+        margin: 1.5rem auto 1rem;
+        max-width: 100%;
+        height: auto;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      }
+      .hero h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(2rem, 5vw, 3.2rem);
+        font-weight: 700;
+        line-height: 1.15;
+        margin-bottom: 1rem;
+        color: var(--navy);
+      }
+      .hero h1 em { color: var(--gold); font-style: normal; }
+      .hero p {
+        max-width: 500px;
+        margin: 0 auto 1.5rem;
+        font-size: 0.95rem;
+        color: var(--navy);
+        line-height: 1.7;
+      }
 
-    /* ── FORM CARD ── */
-    .form-wrapper {
-      max-width: 620px;
-      margin: 1rem auto 4rem;
-      padding: 0 1.5rem;
-      position: relative;
-      z-index: 2;
-    }
+      /* ── FORM CARD ── */
+      .form-wrapper {
+        max-width: 620px;
+        margin: 1rem auto 4rem;
+        padding: 0 1.5rem;
+        position: relative;
+        z-index: 2;
+      }
 
-    .card {
-      background: var(--white);
-      border-radius: 10px;
-      box-shadow: 0 8px 40px rgba(27,42,74,0.12);
-      overflow: hidden;
-    }
+      .card {
+        background: var(--white);
+        border-radius: 10px;
+        box-shadow: 0 8px 40px rgba(27,42,74,0.12);
+        overflow: hidden;
+      }
 
-    .card-header {
-      background: var(--navy);
-      padding: 1.2rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: .75rem;
-    }
-    .card-header svg { color: var(--gold); flex-shrink: 0; }
-    .card-header h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.15rem;
-      color: var(--white);
-    }
+      .card-header {
+        background: var(--navy);
+        padding: 1.2rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+      }
+      .card-header svg { color: var(--gold); flex-shrink: 0; }
+      .card-header h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.15rem;
+        color: var(--white);
+      }
 
-    .card-body { padding: 2rem; }
+      .card-body { padding: 2rem; }
 
-    .form-row { display: grid; gap: 1.2rem; margin-bottom: 1.2rem; }
-    .form-row.two { grid-template-columns: 1fr 1fr; }
-    @media(max-width:560px){ .form-row.two { grid-template-columns: 1fr; } }
+      .form-row { display: grid; gap: 1.2rem; margin-bottom: 1.2rem; }
+      .form-row.two { grid-template-columns: 1fr 1fr; }
+      @media(max-width:560px){ .form-row.two { grid-template-columns: 1fr; } }
 
-    .field { display: flex; flex-direction: column; gap: .4rem; }
-    label {
-      font-size: 0.78rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--navy);
-    }
-    label .req { color: var(--gold); margin-left: 2px; }
+      .field { display: flex; flex-direction: column; gap: .4rem; }
+      label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--navy);
+      }
+      label .req { color: var(--gold); margin-left: 2px; }
 
-    input, textarea, select {
-      border: 1.5px solid var(--border);
-      border-radius: 6px;
-      padding: .65rem .9rem;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.92rem;
-      color: var(--navy);
-      background: var(--white);
-      transition: border-color .2s, box-shadow .2s;
-      outline: none;
-      width: 100%;
-    }
-    input:focus, textarea:focus, select:focus {
-      border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(201,168,76,.15);
-    }
-    textarea { resize: vertical; min-height: 100px; }
+      input, textarea, select {
+        border: 1.5px solid var(--border);
+        border-radius: 6px;
+        padding: .65rem .9rem;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.92rem;
+        color: var(--navy);
+        background: var(--white);
+        transition: border-color .2s, box-shadow .2s;
+        outline: none;
+        width: 100%;
+      }
+      input:focus, textarea:focus, select:focus {
+        border-color: var(--gold);
+        box-shadow: 0 0 0 3px rgba(201,168,76,.15);
+      }
+      textarea { resize: vertical; min-height: 100px; }
 
-    /* Code field */
-    .code-group { display: flex; gap: .5rem; }
-    .code-group input {
-      background: var(--cream);
-      font-family: 'Playfair Display', serif;
-      font-size: 1.1rem;
-      font-weight: 600;
-      letter-spacing: .12em;
-      color: var(--navy);
-      text-align: center;
-      cursor: default;
-    }
-    .btn-regen {
-      background: var(--navy);
-      color: var(--gold);
-      border: none;
-      border-radius: 6px;
-      padding: .5rem .8rem;
-      cursor: pointer;
-      font-size: 1.1rem;
-      transition: background .2s;
-      flex-shrink: 0;
-    }
-    .btn-regen:hover { background: #243860; }
+      /* Code field */
+      .code-group { display: flex; gap: .5rem; }
+      .code-group input {
+        background: var(--cream);
+        font-family: 'Playfair Display', serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        letter-spacing: .12em;
+        color: var(--navy);
+        text-align: center;
+        cursor: default;
+      }
+      .btn-regen {
+        background: var(--navy);
+        color: var(--gold);
+        border: none;
+        border-radius: 6px;
+        padding: .5rem .8rem;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: background .2s;
+        flex-shrink: 0;
+      }
+      .btn-regen:hover { background: #243860; }
 
-    .hint { font-size: 0.72rem; color: var(--gray); margin-top: .15rem; }
+      .hint { font-size: 0.72rem; color: var(--gray); margin-top: .15rem; }
 
-    /* WhatsApp button */
-    .btn-submit {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: .6rem;
-      width: 100%;
-      padding: .9rem;
-      background: #25D366;
-      color: var(--white);
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .2s, transform .1s;
-      margin-top: 1.5rem;
-    }
-    .btn-submit:hover { background: #1ebe5d; }
-    .btn-submit:active { transform: scale(.99); }
-    .btn-submit svg { width: 22px; height: 22px; fill: currentColor; }
+      /* WhatsApp button */
+      .btn-submit {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .6rem;
+        width: 100%;
+        padding: .9rem;
+        background: #25D366;
+        color: var(--white);
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background .2s, transform .1s;
+        margin-top: 1.5rem;
+      }
+      .btn-submit:hover { background: #1ebe5d; }
+      .btn-submit:active { transform: scale(.99); }
+      .btn-submit svg { width: 22px; height: 22px; fill: currentColor; }
 
-    .divider {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 1.5rem 0;
-    }
+      .divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 1.5rem 0;
+      }
 
-    /* Alert */
-    .alert {
-      border-radius: 6px;
-      padding: .75rem 1rem;
-      font-size: 0.85rem;
-      display: none;
-      margin-top: 1rem;
-    }
-    .alert.success { background: #D1FAE5; color: var(--success); border-left: 3px solid var(--success); }
-    .alert.error   { background: #FEE2E2; color: var(--error);   border-left: 3px solid var(--error); }
-    .alert.show    { display: block; }
+      /* Alert */
+      .alert {
+        border-radius: 6px;
+        padding: .75rem 1rem;
+        font-size: 0.85rem;
+        display: none;
+        margin-top: 1rem;
+      }
+      .alert.success { background: #D1FAE5; color: var(--success); border-left: 3px solid var(--success); }
+      .alert.error   { background: #FEE2E2; color: var(--error);   border-left: 3px solid var(--error); }
+      .alert.show    { display: block; }
 
-    /* ── INFO STRIP ── */
-    .info-strip {
-      background: var(--navy);
-      color: rgba(255,255,255,.75);
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 2.5rem;
-      padding: 2rem;
-      font-size: 0.82rem;
-    }
-    .info-item { display: flex; align-items: center; gap: .5rem; }
-    .info-item svg { color: var(--gold); }
+      /* ── INFO STRIP ── */
+      .info-strip {
+        background: var(--navy);
+        color: rgba(255,255,255,.75);
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 2.5rem;
+        padding: 2rem;
+        font-size: 0.82rem;
+      }
+      .info-item { display: flex; align-items: center; gap: .5rem; }
+      .info-item svg { color: var(--gold); }
 
-    footer {
-      text-align: center;
-      padding: 1.2rem;
-      font-size: 0.75rem;
-      color: var(--gray);
-      border-top: 1px solid var(--border);
-    }
-  </style>
+      footer {
+        text-align: center;
+        padding: 1.2rem;
+        font-size: 0.75rem;
+        color: var(--gray);
+        border-top: 1px solid var(--border);
+      }
+    </style>
 </head>
 <body>
 
@@ -302,18 +302,18 @@
 <div class="hero">
   <div class="hero-eyebrow">Asesoría Legal Profesional</div>
   
-  <img src="https://i.imgur.com/EhRGqSL.jpeg" alt="Jorge Meza Espín — Estudio Jurídico" class="hero-img" style="border-radius: 15% />
+  <img src="https://i.imgur.com/EhRGqSL.jpeg" alt="Jorge Meza Espín — Estudio Jurídico" class="hero-img">
       
-<div class="hero-eyebrow"> <b>TODA PERSONA ES INOCENTE HASTA QUE SE DEMUESTRE LO CONTRARIO<b> </div
-    
- 
+  <div class="hero-eyebrow"> <b>TODA PERSONA ES INOCENTE HASTA QUE SE DEMUESTRE LO CONTRARIO</b> </div>
 </div>
 
 <!-- FORM -->
 <div class="form-wrapper">
   <div class="card">
     <div class="card-header">
-      <img src="https://i.imgur.com/rePfrLg.pngg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
       <h2>Solicitud de Consulta</h2>
     </div>
     <div class="card-body">
@@ -338,7 +338,7 @@
           <label>Código de solicitud</label>
           <div class="code-group">
             <input type="text" id="codigo" readonly />
-            <button class="btn-regen" id="btn-regen" title="Generar nuevo código">↻</button>
+            <button class="btn-regen" id="btn-regen" type="button" title="Generar nuevo código">↻</button>
           </div>
           <span class="hint">Guarde este código para seguimientos</span>
         </div>
@@ -354,11 +354,11 @@
       <hr class="divider" />
 
       <div class="alert success" id="alert-ok">
-        ✅ Solicitud registrada correctamente. Se abrirá WhatsApp para confirmar.
+        ✅ Solicitud registrada correctamente. Abriendo WhatsApp...
       </div>
       <div class="alert error" id="alert-err"></div>
 
-      <button class="btn-submit" onclick="enviarSolicitud()">
+      <button class="btn-submit" type="button" onclick="enviarSolicitud()">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
         Enviar solicitud
       </button>
@@ -370,15 +370,12 @@
 <!-- INFO STRIP -->
 <div class="info-strip">
   <div class="info-item">
-   
     Atendemos de Lun–Vie 9:00 – 17:00
   </div>
   <div class="info-item">
-      
     Confidencialidad garantizada
   </div>
   <div class="info-item">
-    
     Av González Suárez & Alberto Zambrano
   </div>
 </div>
@@ -466,12 +463,7 @@
       return; 
     }
 
-    const btn = document.querySelector('.btn-submit');
-    const originalBtnHTML = btn.innerHTML;
-    
-    btn.disabled = true;
-    btn.textContent = 'Procesando...';
-
+    // Guardado en Supabase (sin aislar con async que bloquee el flujo)
     try {
       if (window.supabase) {
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -501,17 +493,21 @@
                          `_Por favor confirme disponibilidad._`;
 
     const msg = encodeURIComponent(mensajePlano);
+    const waUrl = `https://wa.me/${WA_NUMBER}?text=${msg}`;
 
-    setTimeout(() => {
-      window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
-      btn.disabled = false;
-      btn.innerHTML = originalBtnHTML;
-      document.getElementById('nombre').value = '';
-      document.getElementById('cedula').value = '';
-      document.getElementById('celular').value = '';
-      document.getElementById('motivo').value = '';
-      generarCodigo();
-    }, 600);
+    // Abrir WhatsApp directamente para evitar bloqueo del navegador
+    const win = window.open(waUrl, '_blank');
+    if (!win || win.closed || typeof win.closed === 'undefined') {
+      // Si el navegador bloquea la pestaña, redirige en la misma ventana
+      window.location.href = waUrl;
+    }
+
+    // Limpieza de campos post-envío
+    document.getElementById('nombre').value = '';
+    document.getElementById('cedula').value = '';
+    document.getElementById('celular').value = '';
+    document.getElementById('motivo').value = '';
+    generarCodigo();
   }
 </script>
 </body>
