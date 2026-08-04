@@ -27,14 +27,14 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-  background: linear-gradient(rgba(250, 246, 241, 0.88), rgba(250, 246, 241, 0.88)), 
-              url('https://i.imgur.com/bIbkMoJ.jpeg') center/cover fixed no-repeat;
-  color: var(--deep);
-  font-family: 'DM Sans', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+    body {
+      background: linear-gradient(rgba(250, 246, 241, 0.88), rgba(250, 246, 241, 0.88)), 
+                  url('https://i.imgur.com/bIbkMoJ.jpeg') center/cover fixed no-repeat;
+      color: var(--navy);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
     /* ── HEADER ── */
     header {
@@ -82,38 +82,34 @@
       text-transform: uppercase;
     }
 
-    /* ── HERO ── */
+    /* ── HERO (SIN FONDO AZUL) ── */
     .hero {
-      background: linear-gradient(135deg, var(--navy) 0%, #243860 100%);
-      color: var(--white);
+      background: transparent;
+      color: var(--navy);
       text-align: center;
-      padding: 4rem 1.5rem 3rem;
+      padding: 3rem 1.5rem 2rem;
       position: relative;
-      overflow: hidden;
     }
-    .hero::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A84C' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    }
+
     .hero-eyebrow {
       display: inline-block;
       font-size: 0.72rem;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: var(--gold);
+      color: var(--navy);
       margin-bottom: 1rem;
       border-top: 1px solid var(--gold);
       border-bottom: 1px solid var(--gold);
       padding: .25rem 1rem;
+      font-weight: 600;
     }
-      .hero-img {
+    .hero-img {
       display: block;
-      margin: 1.5rem auto 1rem; /* Centra la imagen y le da espacio arriba y abajo */
-      max-width: 100%;          /* Evita que se salga de la pantalla en celulares */
-      height: auto;             /* Mantiene la proporción de la imagen */
-      border-radius: 6px;       /* Le da bordes ligeramente redondeados como tus tarjetas */
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15); /* Una sutil sombra elegante */
+      margin: 1.5rem auto 1rem;
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
     }
     .hero h1 {
       font-family: 'Playfair Display', serif;
@@ -121,20 +117,21 @@
       font-weight: 700;
       line-height: 1.15;
       margin-bottom: 1rem;
+      color: var(--navy);
     }
     .hero h1 em { color: var(--gold); font-style: normal; }
     .hero p {
       max-width: 500px;
       margin: 0 auto 1.5rem;
       font-size: 0.95rem;
-      color: rgba(255,255,255,0.72);
+      color: var(--navy);
       line-height: 1.7;
     }
 
     /* ── FORM CARD ── */
     .form-wrapper {
       max-width: 620px;
-      margin: -2rem auto 4rem;
+      margin: 1rem auto 4rem;
       padding: 0 1.5rem;
       position: relative;
       z-index: 2;
@@ -394,9 +391,8 @@
   // ── CONFIGURACIÓN ──────────────────────────────────────────
   const SUPABASE_URL = 'https://ctbnbikbwgujqglcobcl.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Ym5iaWtid2d1anFnbGNvYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTk3MzQsImV4cCI6MjA5Nzc3NTczNH0.MbaUNGXZ5HEihaQDPXjERxirOLncfe52kqoBrEJhBZw';
-  const WA_NUMBER = '593939104474'; // WhatsApp del estudio
+  const WA_NUMBER = '593939104474';
 
-  // ── 1. FUNCIÓN GENERAR CÓDIGO (Independiente y prioritaria) ──
   function generarCodigo() {
     try {
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
@@ -405,17 +401,12 @@
         code += chars.charAt(Math.floor(Math.random() * chars.length));
       }
       const el = document.getElementById('codigo');
-      if (el) {
-        el.value = code;
-      } else {
-        console.error("No se encontró el input con id 'codigo'");
-      }
+      if (el) el.value = code;
     } catch (err) {
       console.error("Error al generar código:", err);
     }
   }
 
-  // Ejecución inmediata y segura en cuanto el HTML esté listo
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', inicializarPagina);
   } else {
@@ -423,10 +414,7 @@
   }
 
   function inicializarPagina() {
-    // Forzar la aparición del código de inmediato
     generarCodigo();
-
-    // Asignar el botón de regenerar código de forma segura
     const btnRegen = document.getElementById('btn-regen');
     if (btnRegen) {
       btnRegen.onclick = function(e) {
@@ -436,7 +424,6 @@
     }
   }
 
-// ── ENVIAR SOLICITUD (Con ventana emergente de revisión) ──
   async function enviarSolicitud() {
     const nombre  = document.getElementById('nombre').value.trim();
     const cedula  = document.getElementById('cedula').value.trim();
@@ -450,7 +437,6 @@
     if (errEl) errEl.classList.remove('show');
     if (okEl) okEl.classList.remove('show');
 
-    // 1. Validaciones de campos vacíos
     if (!nombre || !cedula || !celular || !motivo) {
       if (errEl) {
         errEl.textContent = '⚠️ Por favor complete todos los campos obligatorios.';
@@ -459,7 +445,6 @@
       return;
     }
     
-    // 2. Validación de cédula (longitud)
     if (!/^\d{10,13}$/.test(cedula.replace(/-/g,''))) {
       if (errEl) {
         errEl.textContent = '⚠️ La cédula debe tener entre 10 y 13 dígitos.';
@@ -468,52 +453,40 @@
       return;
     }
 
-    // 3. 🚨 VENTANA EMERGENTE DE CONFIRMACIÓN 🚨
     const mensajeConfirmacion = 
       `🔍 POR FAVOR, REVISE SUS DATOS ANTES DE ENVIAR:\n\n` +
       `• Nombre: ${nombre}\n` +
       `• Cédula: ${cedula}\n` +
       `• Celular/WhatsApp: ${celular}\n` +
       `• Código de Solicitud: ${codigo}\n\n` +
-      `¿Los datos son correctos? Presione ACEPTAR para proceder con el envío de su consulta.`;
+      `¿Los datos son correctos? Presione ACEPTAR.`;
 
-    // Si el usuario presiona "Cancelar", detenemos la ejecución aquí mismo
     if (!confirm(mensajeConfirmacion)) {
       return; 
     }
 
-    // 4. PROCESO DE ENVÍO (Si el usuario aceptó)
     const btn = document.querySelector('.btn-submit');
     const originalBtnHTML = btn.innerHTML;
     
     btn.disabled = true;
     btn.textContent = 'Procesando...';
 
-    // Intentar guardar en Supabase de manera aislada
     try {
       if (window.supabase) {
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const { error } = await supabaseClient.from('consultas').insert([{
+        await supabaseClient.from('consultas').insert([{
           nombre, cedula, celular, motivo, codigo,
           estado: 'pendiente',
           fecha: new Date().toISOString()
         }]);
-
-        if (error) {
-          console.warn("Supabase devolvió error, pero redirigiremos a WhatsApp igual:", error);
-        }
       }
     } catch (supabaseError) {
-      console.error("Error crítico de Supabase evitado:", supabaseError);
+      console.error("Error Supabase evitado:", supabaseError);
     }
 
-    // Redirección a WhatsApp
-   okEl.classList.add('show');
+    if (okEl) okEl.classList.add('show');
 
-    // ── CONSTRUCCIÓN SEGURA DEL MENSAJE CON EMOJIS ──
     const fecha = new Date().toLocaleDateString('es-EC');
-    
-    // Unificamos todo el texto plano manteniendo los saltos de línea (\n) y emojis nativos
     const mensajePlano = `✅ *SOLICITUD DE CONSULTA – JORGE MEZA ESPÍN*\n` +
                          `————————————————\n` +
                          `📋 *Código:* ${codigo}\n` +
@@ -526,29 +499,12 @@
                          `————————————————\n` +
                          `_Por favor confirme disponibilidad._`;
 
-    // Codificamos todo el bloque completo de forma segura para la URL
     const msg = encodeURIComponent(mensajePlano);
 
     setTimeout(() => {
-      // Enviamos el mensaje 100% codificado
       window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
-      
-      btn.disabled = false;
-      btn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:22px;height:22px;fill:currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg> Enviar solicitud por WhatsApp';
-      
-      // Limpiar formulario
-      document.getElementById('nombre').value = '';
-      document.getElementById('cedula').value = '';
-      document.getElementById('celular').value = '';
-      document.getElementById('motivo').value = '';
-      generarCodigo();
-    }, 800);
-    setTimeout(() => {
-      window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
-      
       btn.disabled = false;
       btn.innerHTML = originalBtnHTML;
-      
       document.getElementById('nombre').value = '';
       document.getElementById('cedula').value = '';
       document.getElementById('celular').value = '';
