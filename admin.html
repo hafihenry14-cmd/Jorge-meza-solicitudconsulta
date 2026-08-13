@@ -474,6 +474,7 @@
   </div>
 </div>
 
+<!-- MODAL VISTA RÁPIDA DILIGENCIAS (CON BÚSQUEDA INTEGRADA) -->
 <div class="modal-bg" id="modal-dilig-lista-bg" onclick="if(event.target===this)cerrarVistaRapidaDiligencias()">
   <div class="modal modal-dilig">
     <div class="modal-head" style="background: var(--navy2)">
@@ -481,6 +482,16 @@
       <button class="modal-close" onclick="cerrarVistaRapidaDiligencias()">×</button>
     </div>
     <div class="modal-body">
+      <!-- Campo de Búsqueda -->
+      <div style="margin-bottom: 1rem;">
+        <input 
+          type="text" 
+          id="search-dilig-input" 
+          placeholder="🔍 Buscar diligencia por título, descripción o fecha..." 
+          oninput="renderListaDiligencias()" 
+          style="width: 100%; border: 1.5px solid #D1D5DB; border-radius: 6px; padding: .6rem .85rem; font-size: .88rem; outline: none;"
+        />
+      </div>
       <div id="dilig-lista-contenido" class="dilig-list"></div>
     </div>
   </div>
@@ -758,8 +769,10 @@
 
   function cerrarModalDiligencia() { document.getElementById('modal-diligencia-bg').classList.remove('open'); }
 
-  // ── VISTA RÁPIDA LISTA DE DILIGENCIAS ──
+  // ── VISTA RÁPIDA LISTA DE DILIGENCIAS (CON BÚSQUEDA INTEGRADA) ──
   function abrirVistaRapidaDiligencias() {
+    const searchInput = document.getElementById('search-dilig-input');
+    if (searchInput) searchInput.value = ''; // Limpiar búsqueda al abrir
     renderListaDiligencias();
     document.getElementById('modal-dilig-lista-bg').classList.add('open');
   }
@@ -770,13 +783,29 @@
 
   function renderListaDiligencias() {
     const contenedor = document.getElementById('dilig-lista-contenido');
+    const searchInput = document.getElementById('search-dilig-input');
+    const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
     if (!todasDiligencias || !todasDiligencias.length) {
       contenedor.innerHTML = '<div class="dilig-empty">No hay diligencias registradas aún.<br>Usa el botón <strong>⚖️ + Agregar Diligencia</strong> para crear una.</div>';
       return;
     }
 
-    const ordenadas = [...todasDiligencias].sort((a, b) => new Date(a.fecha_inicio) - new Date(b.fecha_inicio));
+    // Filtrar según el término ingresado en la barra de búsqueda
+    const filtradas = todasDiligencias.filter(d => {
+      if (!q) return true;
+      const titulo = (d.titulo || '').toLowerCase();
+      const desc = (d.descripcion || '').toLowerCase();
+      const fecha = (d.fecha_inicio || '').toLowerCase();
+      return titulo.includes(q) || desc.includes(q) || fecha.includes(q);
+    });
+
+    if (!filtradas.length) {
+      contenedor.innerHTML = '<div class="dilig-empty">No se encontraron diligencias que coincidan con la búsqueda.</div>';
+      return;
+    }
+
+    const ordenadas = [...filtradas].sort((a, b) => new Date(a.fecha_inicio) - new Date(b.fecha_inicio));
 
     contenedor.innerHTML = ordenadas.map(d => {
       const fechaLegible = d.fecha_inicio
@@ -801,13 +830,12 @@
     }).join('');
   }
 
-  // ── ELIMINAR DILIGENCIA (ACTUALIZADO Y REACTIVO) ──
+  // ── ELIMINAR DILIGENCIA (REACTIVO) ──
   async function eliminarDiligencia(id) {
     if (!id) return;
     if (!confirm('¿Eliminar esta diligencia? Esta acción no se puede deshacer.')) return;
 
     try {
-      // 1. Eliminar reactivamente en memoria local para respuesta instantánea en la interfaz
       todasDiligencias = todasDiligencias.filter(d => String(d.id) !== String(id));
       renderListaDiligencias();
 
@@ -815,12 +843,10 @@
         initCalendario();
       }
 
-      // 2. Ejecutar borrado en Supabase
       const { error } = await sb.from('diligencias').delete().eq('id', id);
 
       if (error) {
         alert('Ocurrió un error al eliminar en la base de datos: ' + error.message);
-        // Si hay error en base de datos, re-sincronizamos desde servidor
         await cargarDiligencias();
         renderListaDiligencias();
         if (calendar) initCalendario();
@@ -971,11 +997,10 @@
     }
   }
 
-  // ── ELIMINAR CONSULTA (ACTUALIZADO Y REACTIVO) ──
+  // ── ELIMINAR CONSULTA (REACTIVO) ──
   async function eliminarConsulta(id, nombre) {
     if (!confirm(`¿Eliminar permanentemente la solicitud de "${nombre}"?\nEsta acción no se puede deshacer.`)) return;
 
-    // Actualización reactiva instantánea
     todasConsultas = todasConsultas.filter(r => String(r.id) !== String(id));
     actualizarStats();
     renderTabla();
