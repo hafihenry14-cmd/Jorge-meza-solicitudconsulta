@@ -503,7 +503,7 @@
   let filtroActual   = 'todos';
   let calendar       = null;
 
-  // ── ZONA HORARIA ECUADOR (UTC-5) ──
+  // ── ZONA HORARIA ECUADOR (UTC-5, sin horario de verano) ──
   const TZ_EC = 'America/Guayaquil';
   const OFFSET_EC = '-05:00';
 
@@ -608,7 +608,7 @@
     }
   }
 
-  // ── CARGAR DATOS ──
+  // ── CARGAR DATOS SIMULTÁNEOS ──
   async function cargarDatosTotales() {
     await cargarConsultas();
     await cargarDiligencias();
@@ -641,7 +641,7 @@
     document.getElementById('stat-rejected').textContent = t.filter(r=>r.estado==='rechazada').length;
   }
 
-  // ── CALENDARIO ──
+  // ── CALENDARIO INTEGRADO ──
   function initCalendario() {
     const calendarEl = document.getElementById('calendar');
     
@@ -688,7 +688,7 @@
     calendar.render();
   }
 
-  // ── VALIDACIONES ──
+  // ── VALIDACIÓN DE HORARIOS COMPARTIDOS ──
   function verificarHorarioDisponible(idActual, fechaVal, horaVal, tipo = 'cita') {
     const ahora = new Date();
     const fechaSeleccionada = new Date(`${fechaVal}T${horaVal}:00${OFFSET_EC}`);
@@ -729,14 +729,16 @@
     }
   }
 
-  // ── GESTIÓN DILIGENCIAS ──
+  // ── GESTIÓN DE DILIGENCIAS ──
   function abrirModalDiligencia() {
     document.getElementById('d-id').value = '';
     document.getElementById('d-titulo').value = '';
     document.getElementById('d-fecha').value = '';
     document.getElementById('d-descripcion').value = '';
     document.getElementById('modal-diligencia-title').textContent = "Registrar Diligencia Jurídica";
+    
     document.getElementById('d-fecha').min = hoyLocal();
+    
     document.getElementById('modal-diligencia-bg').classList.add('open');
   }
 
@@ -756,6 +758,7 @@
 
   function cerrarModalDiligencia() { document.getElementById('modal-diligencia-bg').classList.remove('open'); }
 
+  // ── VISTA RÁPIDA LISTA DE DILIGENCIAS ──
   function abrirVistaRapidaDiligencias() {
     renderListaDiligencias();
     document.getElementById('modal-dilig-lista-bg').classList.add('open');
@@ -798,27 +801,34 @@
     }).join('');
   }
 
+  // ── ELIMINAR DILIGENCIA (ACTUALIZADO Y REACTIVO) ──
   async function eliminarDiligencia(id) {
     if (!id) return;
     if (!confirm('¿Eliminar esta diligencia? Esta acción no se puede deshacer.')) return;
 
     try {
-      // Intenta la eliminación garantizando compatibilidad con IDs numéricos o UUIDs
-      const idQuery = isNaN(id) ? id : Number(id);
-      const { error } = await sb.from('diligencias').delete().eq('id', idQuery);
-      
-      if (error) {
-        alert('Error al eliminar en la base de datos: ' + error.message);
-        return;
-      }
-
-      toast('🗑️ Diligencia eliminada');
-      await cargarDiligencias();
+      // 1. Eliminar reactivamente en memoria local para respuesta instantánea en la interfaz
+      todasDiligencias = todasDiligencias.filter(d => String(d.id) !== String(id));
       renderListaDiligencias();
 
       if (calendar) {
         initCalendario();
       }
+
+      // 2. Ejecutar borrado en Supabase
+      const { error } = await sb.from('diligencias').delete().eq('id', id);
+
+      if (error) {
+        alert('Ocurrió un error al eliminar en la base de datos: ' + error.message);
+        // Si hay error en base de datos, re-sincronizamos desde servidor
+        await cargarDiligencias();
+        renderListaDiligencias();
+        if (calendar) initCalendario();
+        return;
+      }
+
+      toast('🗑️ Diligencia eliminada');
+
     } catch (err) {
       console.error("Error eliminando diligencia:", err);
       alert("Ocurrió un error inesperado al procesar la solicitud.");
@@ -840,8 +850,7 @@
     const datos = { titulo, fecha_inicio: fullFecha, descripcion };
 
     if(id) {
-      const idQuery = isNaN(id) ? id : Number(id);
-      const { error } = await sb.from('diligencias').update(datos).eq('id', idQuery);
+      const { error } = await sb.from('diligencias').update(datos).eq('id', id);
       if(error) { alert(error.message); return; }
     } else {
       const { error } = await sb.from('diligencias').insert([datos]);
@@ -853,7 +862,7 @@
     cargarDatosTotales();
   }
 
-  // ── TABLA CONSULTAS ──
+  // ── CONTROL DE RENDER DE TABLAS Y FILTROS ──
   function renderTabla() {
     const q     = document.getElementById('search-input').value.toLowerCase();
     const tbody  = document.getElementById('tabla-body');
@@ -879,8 +888,8 @@
         <td><span class="badge ${r.estado}">${estadoLabel(r.estado)}</span>${citaCaducada ? '<span class="badge caducado">⏰ Caducada</span>' : ''}</td>
         <td>
           <div class="actions">
-            <button class="action-btn btn-view" onclick='abrirModal(${JSON.stringify(r).replace(/'/g, "&apos;")})'>✏️ Editar</button>
-            <button class="action-btn btn-wa" onclick='enviarWA(${JSON.stringify(r).replace(/'/g, "&apos;")})'>💬</button>
+            <button class="action-btn btn-view" onclick='abrirModal(${JSON.stringify(r)})'>✏️ Editar</button>
+            <button class="action-btn btn-wa" onclick='enviarWA(${JSON.stringify(r)})'>💬</button>
             <button class="action-btn btn-delete" onclick='eliminarConsulta("${r.id}", "${esc(r.nombre)}")'>🗑️</button>
           </div>
         </td>
@@ -948,8 +957,7 @@
       fecha_cita: fechaCitaCompleta
     };
 
-    const idQuery = isNaN(id) ? id : Number(id);
-    const { error } = await sb.from('consultas').update(update).eq('id', idQuery);
+    const { error } = await sb.from('consultas').update(update).eq('id', id);
     if (!error) {
       cerrarModal();
       toast('💾 Cambios guardados — abriendo WhatsApp…');
@@ -963,13 +971,23 @@
     }
   }
 
+  // ── ELIMINAR CONSULTA (ACTUALIZADO Y REACTIVO) ──
   async function eliminarConsulta(id, nombre) {
     if (!confirm(`¿Eliminar permanentemente la solicitud de "${nombre}"?\nEsta acción no se puede deshacer.`)) return;
-    const idQuery = isNaN(id) ? id : Number(id);
-    const { error } = await sb.from('consultas').delete().eq('id', idQuery);
-    if (error) { alert(error.message); return; }
+
+    // Actualización reactiva instantánea
+    todasConsultas = todasConsultas.filter(r => String(r.id) !== String(id));
+    actualizarStats();
+    renderTabla();
+    if (calendar) initCalendario();
+
+    const { error } = await sb.from('consultas').delete().eq('id', id);
+    if (error) { 
+      alert('Error en base de datos: ' + error.message); 
+      cargarDatosTotales();
+      return; 
+    }
     toast('🗑️ Solicitud eliminada permanentemente');
-    cargarDatosTotales();
   }
 
   function enviarWA(r) {
